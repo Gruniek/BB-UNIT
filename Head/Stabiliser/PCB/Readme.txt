@@ -18,6 +18,7 @@
   
  
   Big thanks for http://r2builders.fr/ !
+  Initial project : http://r2builders.fr/forum/viewtopic.php?f=26&t=3928&hilit=BB8+par+MOUS
   
   
   #####################################################
