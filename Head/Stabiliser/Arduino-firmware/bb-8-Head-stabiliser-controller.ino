@@ -1,3 +1,35 @@
+/*
+  - OPEN BB-X -
+ A open source BB-8 for create you own BB-8!
+ ###########################################
+
+ https://github.com/Gruniek/OPEN-BB-X
+ Made by Daniel M/Gruniek/MOUS
+ 
+ Compatible only with an Arduino Nano and the specific PCB.
+ PCB Link : https://github.com/Gruniek/OPEN-BB-X/tree/master/Head/Stabiliser/PCB
+ 
+ --------------
+ - Change log -
+ --------------
+ 
+ 10/1016
+ ==========
+ - Add PID for X and Y
+ 
+ 
+ To do list
+ ==========
+ - Add Z rotation controller
+ - Add Rx/Tx with i2c from the motherboard for change de coordinate of the head, 
+  rotate the head and report to the remote the status off all sensors/positiom.
+  
+  
+  Big thanks for http://r2builders.fr/ !
+*/
+
+
+
 #include "Wire.h"
 #include "I2Cdev.h"
 #include "MPU6050.h"
