@@ -1,1 +1,2 @@
-
+Library for the MPU6050   : https://github.com/jrowberg/i2cdevlib/tree/master/Arduino/MPU6050
+Library for the i2cDevLib : https://github.com/jrowberg/i2cdevlib
