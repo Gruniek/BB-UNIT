@@ -1,0 +1,56 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=botherboard
+*Date=12:38:16
+*CreatedBy=Fritzing 0.9.3b.04.19.5c895d327c44a3114e5fcc9d8260daf0cbb52806
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;;;73.6776;-12.8106;0;Bottom;TXT4
+2;220;THT;29.2793;-49.0397;90;Bottom;R6
+3;;THT;4.38733;-39.7967;0;Bottom;J8
+4;;;54.6793;-38.8797;0;Bottom;Jumper1
+5;;THT;4.38733;-58.0567;0;Bottom;J1
+6;220;THT;72.4593;-41.4197;0;Bottom;R3
+7;1µF;100 mil [THT, electrolytic];87.6993;-60.4697;-90;Bottom;C3
+8;;;72.8967;-3.21502;0;Bottom;TXT3
+9;;;44.5193;-27.4497;0;Bottom;Jumper3
+10;;SO16;43.2493;-22.3697;0;Bottom;Z
+11;;THT;60.2673;-14.3968;0;Bottom;J7
+12;220;THT;34.3593;-10.9397;90;Bottom;R1
+13;;;8.95933;-13.4797;0;Bottom;Jumper4
+14;;3 mm [THT];26.7392;-62.4307;0;Bottom;LED6
+15;;3 mm [THT];78.2304;-38.8798;90;Bottom;LED1
+16;;THT;60.2673;-57.5767;0;Bottom;J2
+17;;THT;60.2673;-22.0168;0;Bottom;J6
+18;;SO16;43.2493;-52.8497;0;Bottom;Y
+19;;;19.1193;-36.3482;180;Bottom;Composant1
+20;;3 mm [THT];31.8192;-62.4307;0;Bottom;LED2
+21;;;6.41933;-64.2797;0;Bottom;Hole3
+22;1µF;100 mil [THT, electrolytic];54.6793;-29.9897;-90;Bottom;C2
+23;;;91.2595;-30.5455;0;Bottom;TXT1
+24;;;92.7793;-64.2797;0;Bottom;Hole2
+25;220;THT;31.8193;-8.3997;90;Bottom;R5
+26;;;6.41933;-5.8597;0;Bottom;Hole4
+27;220;THT;67.3793;-31.2597;90;Bottom;R4
+28;;3 mm [THT];49.5995;-9.09072;0;Bottom;LED3
+29;;;19.1193;-64.2797;0;Bottom;Jumper5
+30;;;85.8483;-12.562;0;Bottom;IMG1
+31;;SO16;76.2772;-52.8292;0;Bottom;X
+32;;3 mm [THT];49.5992;-4.01072;0;Bottom;LED5
+33;;THT;93.2873;-55.0367;0;Bottom;J4
+34;;3 mm [THT];78.2304;-33.7998;90;Bottom;LED4
+35;;;44.5193;-12.2097;0;Bottom;Jumper2
+36;;THT;4.38733;-32.1767;0;Bottom;J9
+37;1µF;100 mil [THT, electrolytic];54.6793;-60.4697;-90;Bottom;C1
+38;;THT;60.2673;-49.9567;0;Bottom;J3
+39;;;92.7793;-5.8597;0;Bottom;Hole1
+40;;THT;93.2873;-47.4167;0;Bottom;J5
+41;220;THT;31.8193;-51.5797;90;Bottom;R2
