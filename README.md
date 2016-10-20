@@ -2,7 +2,7 @@
  A open source BB-8 for create you own BB-8!
  ###########################################
  https://github.com/Gruniek/OPEN-BB-X
- Made by Daniel M/Gruniek/MOU
+ Made by Daniel M/Gruniek/MOUS
   
  
 Big thanks for http://r2builders.fr/ !
