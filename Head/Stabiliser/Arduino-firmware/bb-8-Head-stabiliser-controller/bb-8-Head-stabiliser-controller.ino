@@ -29,6 +29,18 @@
   Initial project : http://r2builders.fr/forum/viewtopic.php?f=26&t=3928&hilit=BB8+par+MOUS
 
 */
+
+#define pinEnable 8 // Activation du driver/pilote
+
+#define pinStep    2 //2 Signal de PAS (avancement)
+#define pinDir     5 //5 Direction 
+
+
+
+#define pinStepY    4 // 4Signal de PAS (avancement)
+#define pinDirY     7 // 7Direction 
+
+
 #include "Wire.h"
 #include "I2Cdev.h"
 #include "MPU6050.h"
@@ -60,16 +72,17 @@ int setpointX      = 90;
 int setpointY      = 90; 
 int hysteresis     = 1; 
 
-int motorX         = 5;  // PIN 
-int enableX        = 7;  // PIN
-int dirX           = 6;  // PIN
-int motorY         = 8;  // PIN 
-int enableY        = 10; // PIN
-int dirY           = 9;  // PIN
-int motorZ         = 3;  // PIN
-int dirZ           = 2;  // PIN
-int enableZ        = 4;  // PIN
+int motorX         = 2;  // PIN 5
+int enableX        = 8;  // PIN7
+int dirX           = 5;  // PIN6
+int motorY         = 4;  // PIN 8
+int enableY        = 9; // PIN10
+int dirY           = 7;  // PIN9
+int motorZ         = 3;  // PIN3
+int dirZ           = 10;  // PIN2
+int enableZ        = 4;  // PIN4
 
+int multiplier     = 15;
 int emergencyStop  = 11; // PIN
 int eStop          = 12; // PIN
 
@@ -89,8 +102,13 @@ bool start = false;
 
 void setup()
 {
-
-    Serial.begin(115200);
+  pinMode( pinEnable, OUTPUT );
+  pinMode( pinDir   , OUTPUT );
+  pinMode( pinStep  , OUTPUT );
+  pinMode( pinDirY   , OUTPUT );
+  pinMode( pinStepY  , OUTPUT );
+  
+    Serial.begin(9600);
     
   Serial.println("Initializing I2C devices...");
   Serial.print("I2C Adress = ");
@@ -139,7 +157,7 @@ void loop()
         {
           case 'x': setpointX = val; break;
           case 'y': setpointY = val; break;
-      
+      	  case 'm': multiplier = val; break;
         }
       }
     }
@@ -150,7 +168,7 @@ void loop()
       start = true;
     }
     
-    if (strcmp(strtok(msg, " "), "ALT") == 0)
+    if (strcmp(strtok(msg, " "), "STOP") == 0)
     {
       Serial.println("STOP");
       start = false;
@@ -168,13 +186,13 @@ void loop()
   if(x < 90) directX = false;
   else directX = true;
 
-  digitalWrite(dirX, directX);
+  digitalWrite(pinDir, directX); // dirX
   
   // Si ont doit demarer le moteur
   if(x > (setpointX + hysteresis) || (x < setpointX - hysteresis )) 
   { 
     if(x > minX && x < maxX) runX = true; 
-    else runY = false;
+    else runX = false;
   }
   else runX = false;
   
@@ -185,7 +203,8 @@ void loop()
   if(x > 90) vx = (x - 90);
   
   speedX = 1000 / (vx);
-  if(speedX < 15) speedX = 15;
+    speedX = speedX / multiplier; // DEL
+  //if(speedX < 15) speedX = 15;
   
 
   // Mise en route du moteur
@@ -198,13 +217,14 @@ void loop()
       
       if(runX)
       {
-        digitalWrite(motorX, 0);
-        delay(15);
-        digitalWrite(motorX, 1);
-        Serial.print(">X< : STEP ");
+        digitalWrite(pinStep, 1);
+        delayMicroseconds( 500 );
+        digitalWrite(pinStep, 0);
+        delayMicroseconds( 500 );
+        /*Serial.print(">X< : STEP ");
         Serial.print(directX);
         Serial.print(" ");
-        Serial.println(x);
+        Serial.println(x);*/
       }
   }
 
@@ -214,7 +234,7 @@ void loop()
   if(y < 90) directY = false;
   else directY = true;
 
-  digitalWrite(dirY, directY);
+  digitalWrite(pinDirY, directY);
   
   // Si ont doit demarer le moteur
   if(y > (setpointY + hysteresis) || (y < setpointY - hysteresis )) 
@@ -230,11 +250,12 @@ void loop()
   if(y > 90) vy = (y - 90);
   
   speedY = 1000 / (vy);
-  if(speedY < 15) speedY = 15;
+  speedY = speedY / multiplier; // DEL
+  //if(speedY < 15) speedY = 15;
   
 
   // Mise en route du moteur
-  unsigned long currentY = millis();
+  unsigned long currentY = millis(); // millis();
 
     if (currentY - previousMillisY >= speedY) 
     {
@@ -242,13 +263,14 @@ void loop()
       
       if(runY)
       {
-        digitalWrite(motorY, 0);
-        delay(15);
-        digitalWrite(motorY, 1);
-        Serial.print("<Y> : STEP ");
+        digitalWrite(pinStepY, 1);
+        delayMicroseconds( 500 );
+        digitalWrite(pinStepY, 0);
+        delayMicroseconds( 500 );
+       /* Serial.print("<Y> : STEP ");
         Serial.print(directY);
         Serial.print(" ");
-        Serial.println(y);
+        Serial.println(y);*/
       }
   } 
   
