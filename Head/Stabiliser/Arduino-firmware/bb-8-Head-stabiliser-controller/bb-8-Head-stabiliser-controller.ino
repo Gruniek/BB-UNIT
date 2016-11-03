@@ -45,8 +45,8 @@
 #define pinStepY         6      // PIN STEP FOR Y
 #define pinDirY          5      // PIN DIRECTION FOR Y
 
-#define pinStepY         8      // PIN STEP FOR Y
-#define pinDirY          7      // PIN DIRECTION FOR Y
+#define pinStepZ         8      // PIN STEP FOR Y
+#define pinDirZ          7      // PIN DIRECTION FOR Y
 
 #define Z_POSITION       9      // PIN FOR THE DIGITAL INPUT FOR THE HEAD POSITION
 
@@ -87,10 +87,11 @@ int vy             = 0;
 
 int speedX         = 0;
 int speedY         = 0;
-
+int speedZ         = 0;
 int setpointX      = 90; 
 int setpointY      = 90; 
 
+int Zangle         = 0;
 
 
 int multiplier     = 15;
@@ -99,8 +100,10 @@ int eStop          = 12; // PIN
 
 bool runX          = false; 
 bool runY          = false; 
+bool runZ          = false;
 bool directX       = false; // false = Gauche / true = droite
 bool directY       = false; // false = Gauche / true = droite
+bool directZ       = false; // false = Gauche / true = droite
 
 bool xok           = false;
 bool yok           = false;
@@ -109,6 +112,8 @@ bool zok           = false;
 // PID
 unsigned long previousMillisX = 0;
 unsigned long previousMillisY = 0;
+unsigned long previousMillisZ = 0;
+
 long                    intX  = 0;
 long                    intY  = 0; 
 
@@ -234,10 +239,25 @@ void loop()
     	    delay(2000);
     	}
     	
+    	if (strcmp(strtok(msg, " "), "ROTATE") == 0) // ROTATE d1 s100  <-- Rotate Z right, 18c/sec
+    	{
+      		// trouvé le message
+      		char *p;
+      		while ((p = strtok(NULL, " ")) != NULL)
+      		{
+        		int val = atoi(p + 1);
+        		switch (*p)
+        		{
+          			case 'd': directZ  = val; break;
+          			case 's': speedZ   = val; break;
+        		}
+      		}
+    	}
+    	
     	
   }
    
-   if(boot)
+   if(BOOT)
    {
    	    // SET X IN POSITION
    		if(x < 90) directX = false;
@@ -261,7 +281,7 @@ void loop()
   		{
   			if(!xok) 
   			{
-  				Serial.println(STAT x1);
+  				Serial.println("STAT x1");
   				xok = true;
   				delay(2000);
   			}
@@ -290,7 +310,7 @@ void loop()
   		{
   			if(!yok) 
   			{
-  				Serial.println(STAT y1);
+  				Serial.println("STAT y1");
   				yok = true;
   				delay(2000);
   			}
@@ -298,7 +318,30 @@ void loop()
   		
   		// SET W IN POSITION
   		
-  		if()
+  		if(!Z_POSITION)
+  		{
+  		  	digitalWrite(pinStepZ, 1);
+        	delayMicroseconds( 500 );
+    	    digitalWrite(pinStepZ, 0);
+    	    delayMicroseconds( 500 );	
+  		}
+  		else
+  		{
+  		  	if(!zok) 
+  			{
+  				Serial.println("STAT z1");
+  				zok = true;
+  				Zangle = 0;
+  				delay(2000);
+  			}	
+  		}
+  		
+  		if( xok && yok && zok)
+  		{
+  			Serial.println("Booting UP OK!");
+  			Serial.println("SEND 'RUN \n' for start the production");
+  			BOOT = false;
+  		}
   
   
    }
@@ -308,101 +351,115 @@ void loop()
     if(production)  //-
     { 
 
-  // X //
+  		// X //
   
-  // Direction
-  if(x < 90) directX = false;
-  else directX = true;
+		// Direction
+  		if(x < 90) directX = false;
+  		else directX = true;
   
-  if(invertX) 
-  {
-    if(directX) directX = false;
-    else directX = true;
-  }
+  		if(invertX) 
+  		{
+    		if(directX) directX = false;
+    		else directX = true;
+  		}
+  		digitalWrite(pinDirX, directX); // dirX
   
-  digitalWrite(pinDirX, directX); // dirX
+  		// Si ont doit demarer le moteur
+  		if(x > (setpointX + hysteresis) || (x < setpointX - hysteresis )) 
+  		{ 
+    		if(x > minX && x < maxX) runX = true; 
+    		else runX = false;
+  		}
+  		else runX = false;
+ 
+  		// Calcul du PID X
+  		if(x < 90) vx = (90 - x); 
+  		if(x == 0) vx = 0;
+  		if(x > 90) vx = (x - 90);
   
-  // Si ont doit demarer le moteur
-  if(x > (setpointX + hysteresis) || (x < setpointX - hysteresis )) 
-  { 
-    if(x > minX && x < maxX) runX = true; 
-    else runX = false;
-  }
-  else runX = false;
+  		speedX = 1000 / (vx);
+  		speedX = speedX * multiplier; // DEL
+  		if(speedX < 15) speedX = 15;
   
-  
-  // Calcul du PID X
-  if(x < 90) vx = (90 - x); 
-  if(x == 0) vx = 0;
-  if(x > 90) vx = (x - 90);
-  
-  speedX = 1000 / (vx);
-  speedX = speedX * multiplier; // DEL
-  if(speedX < 15) speedX = 15;
-  
-
-  // Mise en route du moteur
-  unsigned long currentX = millis();
-
-  
-    if (currentX - previousMillisX >= speedX) 
-    {
-      previousMillisX = currentX;
+		// Mise en route du moteur
+  		unsigned long currentX = millis();
+  		
+    	if (currentX - previousMillisX >= speedX) 
+    	{
+      		previousMillisX = currentX;
       
-      if(runX)
-      {
-        digitalWrite(pinStepX, 1);
-        delayMicroseconds( 500 );
-        digitalWrite(pinStepX, 0);
-        delayMicroseconds( 500 );
-      }
-  }
+      		if(runX)
+      		{
+        		digitalWrite(pinStepX, 1);
+        		delayMicroseconds( 500 );
+        		digitalWrite(pinStepX, 0);
+    	 		delayMicroseconds( 500 );
+      		}
+  		}
 
-  // Y //
+  		// Y //
+  		// Direction
+  		if(y < 90) directY = false;
+  		else directY = true;
+  		if(invertY) 
+  		{
+    		if(directY) directY = false;
+    		else directY = true;
+  		}
+  		digitalWrite(pinDirY, directY);
   
-  // Direction
-  if(y < 90) directY = false;
-  else directY = true;
-  if(invertY) 
-  {
-    if(directY) directY = false;
-    else directY = true;
-  }
-  digitalWrite(pinDirY, directY);
+		// Si ont doit demarer le moteur
+  		if(y > (setpointY + hysteresis) || (y < setpointY - hysteresis )) 
+  		{ 
+    		if(y > minY && y < maxY) runY = true; 
+    		else runY = false;
+  		}
+  		else runY = false;
   
-  // Si ont doit demarer le moteur
-  if(y > (setpointY + hysteresis) || (y < setpointY - hysteresis )) 
-  { 
-    if(y > minY && y < maxY) runY = true; 
-    else runY = false;
-  }
-  else runY = false;
+  		// Calcul du PID Y
+  		if(y < 90) vy = (90 - y); 
+  		if(y == 0) vy = 0;
+  		if(y > 90) vy = (y - 90);
   
-  // Calcul du PID X
-  if(y < 90) vy = (90 - y); 
-  if(y == 0) vy = 0;
-  if(y > 90) vy = (y - 90);
-  
-  speedY = 1000 / (vy);
-  speedY = speedY * multiplier; // DEL
-  if(speedY < 15) speedY = 15;
-  
+  		speedY = 1000 / (vy);
+  		speedY = speedY * multiplier; // DEL
+  		if(speedY < 15) speedY = 15;
+ 
+  		// Mise en route du moteur
+  		unsigned long currentY = millis(); // millis();
 
-  // Mise en route du moteur
-  unsigned long currentY = millis(); // millis();
-
-    if (currentY - previousMillisY >= speedY) 
-    {
-      previousMillisY = currentY;
+    	if (currentY - previousMillisY >= speedY) 
+    	{
+      		previousMillisY = currentY;
       
-      if(runY)
-      {
-        digitalWrite(pinStepY, 1);
-        delayMicroseconds( 500 );
-        digitalWrite(pinStepY, 0);
-        delayMicroseconds( 500 );
-      }
-  } 
+      		if(runY)
+      		{
+        		digitalWrite(pinStepY, 1);
+        		delayMicroseconds( 500 );
+        		digitalWrite(pinStepY, 0);
+        		delayMicroseconds( 500 );
+      		}
+  		} 
+  
+  		//--- Z
+  		if(speedZ != 0)
+  		{
+  			unsigned long currentZ = millis();
+  			if (currentZ - previousMillisZ >= speedZ) 
+    		{
+      			previousMillisZ = currentZ;
+  
+    	 		digitalWrite(pinStepY, 1);
+    	    	delayMicroseconds( 500 );
+    	    	digitalWrite(pinStepY, 0);
+    	    	delayMicroseconds( 500 );
+    	    	if(directZ) Zangle++;
+    	    	else Zangle--;
+  			} 
+  		}
+  		if(Zangle == 201) Zangle = 0;
+  		if(Zangle == -1)  Zangle = 0;
+  		
   
   } //-
   
@@ -436,6 +493,9 @@ void loop()
     	Serial.print(invertY);
     	Serial.print(" m");
     	Serial.print(multiplier);
+    	Serial.print(" z");
+    	Serial.print(Zangle);
+    	
     	Serial.println(" ");
     }
 }
