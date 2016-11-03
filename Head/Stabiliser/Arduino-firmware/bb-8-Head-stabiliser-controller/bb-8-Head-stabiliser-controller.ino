@@ -13,7 +13,14 @@
  - Change log -
  --------------
  
- 10/1016
+ 11/2016
+ =========
+ - FIX alls bug foe stabilisation
+ - ADD BOOT, STAT, ROTATE command
+ - ADD Z motor configuration and production
+ - ADD BOOT mode, for initilize or reinizialize the Droid position
+ 
+ 10/2016
  ==========
  - Add PID for X and Y
  
