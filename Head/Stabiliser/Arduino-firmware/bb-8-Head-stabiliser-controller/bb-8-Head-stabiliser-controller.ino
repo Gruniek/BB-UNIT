@@ -27,7 +27,43 @@
   
   Big thanks for http://r2builders.fr/ !
   Initial project : http://r2builders.fr/forum/viewtopic.php?f=26&t=3928&hilit=BB8+par+MOUS
+  
+  ===============
+  EXEMPLE COMMAND 
+  ===============
+  < SET >
+  'SET x87 y75 h3 \n'        // SET a new setpoint for x and y with 3degree of Hysteressis
+  'SET x90 y90 i1 j0 k1 \n'  // SET an inversion of the sensor X Y and invert the direction of X
+  
+  	x = SETPOINT for X
+	y = SETPOINT for Y
+	m = MULTIPLIER FOR THE SPEED OF THE MOTOR X and Y
+	i = INVERT the angle sensor ( X = Y and Y = X )
+	j = INVERT the direction of X
+	k = INVERT the direction of Y
+	h = SET a new HYSTERESSIS 
 
+
+
+  < BOOT > 
+  'BOOT \n'  // LAUNCH TEST for X, Y and Z -> Return X and Y to initial SETPOINT (x90 y90 ) and Z to ZERO
+
+
+
+  < RUN >
+  'RUN \n'   // RUN the code in production mode (Recieved all data, X and Y runing for the SETPOINT poistion and Z folow the remote controll
+  
+  < STOP >   
+  'STOP \n'  // STOP the production mode. All motors are stopped.
+  
+  
+  < ROTATE >
+  'ROTATE d1 s100 \n'   // ROTATE Z motor on the RIGHT DIRECTION (d0 LEFT, d1 RIGHT) WITH the SPEED at 1000/100 = 10 step/sec = 18dec/sec
+  
+  
+  < STAT >
+  // It is all data SENDED to the MASTER-BOARD
+  
 */
 
 #include "Wire.h"
@@ -136,7 +172,7 @@ bool BOOT = false;
 //=============================================================================//
 void setup()
 {
-	pinMode( pinEnable , OUTPUT );
+    pinMode( pinEnable , OUTPUT );
     pinMode( pinDirX   , OUTPUT );
     pinMode( pinStepX  , OUTPUT );
     pinMode( pinDirY   , OUTPUT );
@@ -281,7 +317,7 @@ void loop()
   		{
   			if(!xok) 
   			{
-  				Serial.println("STAT x1");
+  				Serial.println("STAT x1 ");
   				xok = true;
   				delay(2000);
   			}
@@ -310,7 +346,7 @@ void loop()
   		{
   			if(!yok) 
   			{
-  				Serial.println("STAT y1");
+  				Serial.println("STAT y1 ");
   				yok = true;
   				delay(2000);
   			}
@@ -329,7 +365,7 @@ void loop()
   		{
   		  	if(!zok) 
   			{
-  				Serial.println("STAT z1");
+  				Serial.println("STAT z1 ");
   				zok = true;
   				Zangle = 0;
   				delay(2000);
@@ -338,6 +374,7 @@ void loop()
   		
   		if( xok && yok && zok)
   		{
+			Serial.println("STAT b1 ");
   			Serial.println("Booting UP OK!");
   			Serial.println("SEND 'RUN \n' for start the production");
   			BOOT = false;
@@ -481,7 +518,7 @@ void loop()
     	
     	
     	// SEND STATUT
-    	Serial.print("SEND x");
+    	Serial.print("STAT x");
     	Serial.print(x);
     	Serial.print(" y");
     	Serial.print(y);
