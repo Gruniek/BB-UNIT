@@ -1,3 +1,4 @@
+String version = "0.1.2";
 /*
   - OPEN BB-X -
  A open source BB-8 for create you own BB-8!
@@ -119,9 +120,9 @@ int16_t ax, ay, az;
 int16_t gx, gy, gz;
 
 // I2C
-int adress = 2;
-int PING   = 13; // PIN
-
+int adress         = 2;
+int PING           = 13; // PIN
+int PING_MASTER    = 12;
 // VARIABLE
 int x              = 0; 
 int y              = 0; 
@@ -140,6 +141,7 @@ int Zangle         = 0;
 int multiplier     = 15;
 int emergencyStop  = 11; // PIN
 int eStop          = 12; // PIN
+bool emgStop       = false;
 
 bool runX          = false; 
 bool runY          = false; 
@@ -171,38 +173,53 @@ bool production = false;
 bool LED_PING   = false;
 bool BOOT = false;
 
-
-
+bool ifPing    = false;
+int tmpPing    = 0;
+int tmpPing2   = 0;
+int pingMaster = 0;
 
 //=============================================================================//
 //   SETUP
 //=============================================================================//
 void setup()
 {
-    pinMode( pinEnable , OUTPUT );
-    pinMode( pinDirX   , OUTPUT );
-    pinMode( pinStepX  , OUTPUT );
-    pinMode( pinDirY   , OUTPUT );
-    pinMode( pinStepY  , OUTPUT );
-    pinMode( PING      , OUTPUT );
-    pinMode( Z_POSITION, INPUT  );
+    pinMode( pinEnable   , OUTPUT );
+    pinMode( pinDirX     , OUTPUT );
+    pinMode( pinStepX    , OUTPUT );
+    pinMode( pinDirY     , OUTPUT );
+    pinMode( pinStepY    , OUTPUT );
+    pinMode( PING        , OUTPUT );
+    pinMode( PING_MASTER , INPUT  );
+    pinMode( Z_POSITION  , INPUT  );
     
     
     Serial.begin(9600);
+    Serial.println("Booting up...");
+    Serial.println(" ");
+    Serial.println("_ Astromech Industrie _");
+    Serial.print("  BB-8 Version ");
+    Serial.println(version);
+    Serial.println("===================");
+    Serial.println(" ");
     
-    Serial.println("Initializing I2C devices...");
-    Serial.print("I2C Adress = ");
-    Serial.println(adress);
+
+
+    
+    Serial.print("Initializing I2C devices...  I2C ADRESS :");
+    Serial.print(adress);
   
     Wire.begin(adress);
-    //Wire.onReceive(); // register event
-
     
     accelgyro.initialize();
+	Serial.println(" [ OK ]");
 
-
-    Serial.println("Testing device connections...");
-    Serial.println(accelgyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
+    Serial.print("Connect to the MPU6050 : ");
+    Serial.println(accelgyro.testConnection());
+    //Serial.println(accelgyro.testConnection() ? "Connection successful" : "Connection failed");
+    
+    Serial.println("Booting successful !");
+    Serial.println("====================");
+    
 
 }
 
@@ -266,6 +283,7 @@ void loop()
     	{
         	Serial.println("ROll BB-8 ROLL !");
       	    production = true;
+      	    emgStop = false;
     	}
     
     	if (strcmp(strtok(msg, " "), "STOP") == 0)
@@ -274,9 +292,15 @@ void loop()
     	    production = false;
     	}
     	
+    	if (strcmp(strtok(msg, " "), "RESET") == 0)
+    	{
+    		Serial.println("RESET");
+    	    production = false;
+    	}
+    	
     	if (strcmp(strtok(msg, " "), "BOOT") == 0)
     	{
-    		Serial.println("STOP");
+    		
     	    BOOT = true;
     	    Serial.println("BOOTING UP...");
     	    delay(2000);
@@ -324,7 +348,7 @@ void loop()
   		{
   			if(!xok) 
   			{
-  				Serial.println("STAT x1 ");
+  				Serial.println("BOOT x1 ");
   				xok = true;
   				delay(2000);
   			}
@@ -353,13 +377,13 @@ void loop()
   		{
   			if(!yok) 
   			{
-  				Serial.println("STAT y1 ");
+  				Serial.println("BOOT y1 ");
   				yok = true;
   				delay(2000);
   			}
   		}
   		
-  		// SET W IN POSITION
+  		// SET Z IN POSITION
   		
   		if(!Z_POSITION)
   		{
@@ -372,7 +396,7 @@ void loop()
   		{
   		  	if(!zok) 
   			{
-  				Serial.println("STAT z1 ");
+  				Serial.println("BOOT z1 ");
   				zok = true;
   				Zangle = 0;
   				delay(2000);
@@ -392,7 +416,7 @@ void loop()
    
 	// PRODUCTION CODE
     //-------------------------------------------------------------------------// 
-    if(production)  //-
+    if(production && !emgStop)  //-
     { 
 
   		// X //
@@ -506,6 +530,16 @@ void loop()
   		
   
   } //-
+ 
+  // Check if the Master-Board are ALIVE
+ 
+  if(digitalRead(PING_MASTER) && !ifPing)
+  {
+  	ifPing = true;
+  	pingMaster++;
+  }
+  
+  if(digitalRead(PING_MASTER) && ifPing) ifPing = false;
   
   
   	// SEND SERIAL DATA
@@ -524,6 +558,32 @@ void loop()
     	digitalWrite(PING, LED_PING);
     	
     	
+    	tmpPing2++;
+    	
+    	if(pingMaster > tmpPing) 
+    	{
+    		tmpPing = pingMaster;
+    		tmpPing2 = 0;
+    	}
+    	if(tmpPing2 > 3) emgStop = true;
+    	
+    	
+    	
+    	if(!accelgyro.testConnection());
+    	{
+    		production = false;
+    		emgStop = true;
+    		accelgyro.initialize();
+    		if(accelgyro.testConnection())
+    		{
+    			production = true;
+    		}
+    	}
+    	
+    	
+    	
+    	/*
+    	
     	// SEND STATUT
     	Serial.print("STAT x");
     	Serial.print(x);
@@ -541,5 +601,7 @@ void loop()
     	Serial.print(Zangle);
     	
     	Serial.println(" ");
+    	
+    	*/
     }
 }
