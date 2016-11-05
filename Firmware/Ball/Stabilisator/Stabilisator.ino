@@ -1,4 +1,4 @@
-String version = "0.1.2";
+String version = "0.1.3";
 /*
 
  >      FIRMWARE ONLY FOR AN ARDUINO NANO !!    <
