@@ -50,6 +50,7 @@ http://www.electroschematics.com/9351/arduino-digital-voltmeter/
 #include <nRF24L01.h>
 #include <RF24.h>
 #include <RF24_config.h>
+#include "PCF8574.h"
 
 int i2cAdress      = 1;
 
@@ -78,6 +79,9 @@ bool production    = false;
 
 unsigned long trigSec  = 1000;
 unsigned long trigS    = 0;
+
+/** PCF8574 instance */
+PCF8574 expander;
 
 //RF24 PINOUT
 //
@@ -142,6 +146,19 @@ void setup()
     radio.begin();
     radio.openWritingPipe(pipe);
     radio.startListening();
+    
+    /* Start I2C bus and PCF8574 instance */
+  	expander.begin(0x20);
+  
+  	/* Setup some PCF8574 pins for demo */
+  	expander.pinMode(0, OUTPUT);
+  	expander.pinMode(1, OUTPUT);
+  	expander.pinMode(2, OUTPUT);
+    expander.pinMode(3, OUTPUT);
+    expander.pinMode(4, OUTPUT);
+    expander.pinMode(5, OUTPUT);
+    expander.pinMode(6, OUTPUT);
+    expander.pinMode(7, OUTPUT);
     
     Serial.println("Booting successful !");
     Serial.println("====================");
