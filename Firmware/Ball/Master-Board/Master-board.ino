@@ -1,6 +1,8 @@
 String version = "0.1.1";
 /*
+http://www.electroschematics.com/9351/arduino-digital-voltmeter/
 http://shanes.net/another-nrf24l01-sketch-string-sendreceive/
+
  >      FIRMWARE ONLY FOR AN ARDUINO NANO !!    <
  > IF YOU USE ANOTHER ARDUINO, ADAPT THE PINOUT <
  
@@ -59,7 +61,11 @@ int pinEnable      = 4;      // Activation off all stepper
 int pinDirB        = 5;      // PIN DIRECTION FOR Y
 int pinStepB       = 6;      // PIN STEP FOR Y
 
-
+int CurrentBat1    = 0;
+int CurrentBat2    = 1;
+int CurrentBat3    = 2;
+int CurrentBat4    = 3;
+int Pinvoltage     = 6;
 
 int PING           = 13; 
 int PING_MASTER    = 12;
@@ -182,4 +188,40 @@ void loop()
       	}
    }
   
+}
+
+
+
+
+
+
+int current(int Cpin)
+{
+	int mVperAmp = 185; // use 100 for 20A Module and 66 for 30A Module
+	int RawValue= 0;
+	int ACSoffset = 2500; 
+	double Voltage = 0;
+	double Amps = 0;
+
+	RawValue = analogRead(Cpin);
+ 	Voltage = (RawValue / 1024.0) * 5000; // Gets you mV
+ 	Amps = ((Voltage - ACSoffset) / mVperAmp);
+ 
+ 	return(Amps);
+}
+
+int voltage(int Vpin)
+{
+	float vout = 0.0;
+	float vin = 0.0;
+	float R1 = 100000.0; // resistance of R1 (100K) -see text!
+	float R2 = 10000.0; // resistance of R2 (10K) - see text!
+	int value = 0;
+
+	value = analogRead(Vpin);
+    vout = (value * 5.0) / 1024.0;
+    vin = vout / (R2/(R1+R2)); 
+    if (vin<0.09) vin=0.0;
+   
+    return(vin);
 }
