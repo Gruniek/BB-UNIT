@@ -1,7 +1,6 @@
 String version = "0.1.1";
 /*
 http://www.electroschematics.com/9351/arduino-digital-voltmeter/
-http://shanes.net/another-nrf24l01-sketch-string-sendreceive/
 
  >      FIRMWARE ONLY FOR AN ARDUINO NANO !!    <
  > IF YOU USE ANOTHER ARDUINO, ADAPT THE PINOUT <
@@ -9,10 +8,10 @@ http://shanes.net/another-nrf24l01-sketch-string-sendreceive/
  ###################################################
   ______  ______     _     _ ______  _____ _______ 
  (____  \(____  \   | |   | |  ___ \(_____|_______)
-  ____)  )____)  )__| |   | | |   | | | | | |         
- |  __  (|  __  (___) |   | | |   | | | | | |      
- | |__)  ) |__)  )  | |___| | |   | |_| |_| |_____ 
- |______/|______/    \______|_|   |_(_____)\______)
+  ____)  )____)  )__| |   | | |   | | | |    | |         
+ |  __  (|  __  (___) |   | | |   | | | |    | |      
+ | |__)  ) |__)  )  | |___| | |   | |_| |_   | | 
+ |______/|______/    \______|_|   |_(_____)  |_|
     A open source project for create you own BB-8!
  ###################################################
 
@@ -67,8 +66,30 @@ int CurrentBat3    = 2;
 int CurrentBat4    = 3;
 int Pinvoltage     = 6;
 
-int PING           = 13; 
-int PING_MASTER    = 12;
+int PING           = 10; 
+int PING_SLAVE     = 0;  // A0
+int pingMaster     = 0;
+bool LED_PING      = false;
+bool tmpPing       = false;
+bool tmpPing2      = false;
+bool ifPing        = false;
+bool emgStop       = false;
+bool production    = false;
+
+unsigned long trigSec  = 1000;
+unsigned long trigS    = 0;
+
+//RF24 PINOUT
+//
+// RF24 -- ARDUINO
+//    1 -- GND
+//    2 -- 3,3V
+//    3 -- 8
+//    4 -- 7
+//    5 -- 13
+//    6 -- 11
+//    7 -- 12
+//    8 -- 2
 
 // MPU6050
 MPU6050 accelgyro;
@@ -92,7 +113,6 @@ void setup()
     pinMode( pinDirB     , OUTPUT );
     pinMode( pinStepB    , OUTPUT );
     pinMode( PING        , OUTPUT );
-    pinMode( PING_MASTER , INPUT  );
 
 	Serial.begin(9600);
 	Serial.println("Booting up...");
@@ -187,6 +207,69 @@ void loop()
        		theMessage= ""; 
       	}
    }
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+     if((analogRead(PING_SLAVE) > 200) && ifPing) ifPing = false;
+  
+  
+  	// SEND SERIAL DATA
+    //-------------------------------------------------------------------------// 
+    unsigned long currentS = millis(); // millis();
+
+    if (currentS - trigS  >= trigSec) 
+    {
+    	trigS = currentS;
+   
+   
+   
+       	// PING
+    	if(LED_PING) LED_PING = false;
+    	else LED_PING = true;
+    	digitalWrite(PING, LED_PING);
+    	
+    	
+    	tmpPing2++;
+    	
+    	if(pingMaster > tmpPing) 
+    	{
+    		tmpPing = pingMaster;
+    		tmpPing2 = 0;
+    	}
+    	if(tmpPing2 > 3) emgStop = true;
+    	
+    	
+    	
+    	if(!accelgyro.testConnection());
+    	{
+    		production = false;
+    		emgStop = true;
+    		accelgyro.initialize();
+    		if(accelgyro.testConnection())
+    		{
+    			production = true;
+    		}
+    	}
+    }
   
 }
 
