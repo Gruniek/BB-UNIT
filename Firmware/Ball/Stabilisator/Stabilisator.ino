@@ -1,8 +1,18 @@
 String version = "0.1.2";
 /*
-  - BB-UNIT -
- A open source BB-8 for create you own BB-8!
- ###########################################
+
+ >      FIRMWARE ONLY FOR AN ARDUINO NANO !!    <
+ > IF YOU USE ANOTHER ARDUINO, ADAPT THE PINOUT <
+ 
+ ###################################################
+  ______  ______     _     _ ______  _____ _______ 
+ (____  \(____  \   | |   | |  ___ \(_____|_______)
+  ____)  )____)  )__| |   | | |   | | | | | |         
+ |  __  (|  __  (___) |   | | |   | | | | | |      
+ | |__)  ) |__)  )  | |___| | |   | |_| |_| |_____ 
+ |______/|______/    \______|_|   |_(_____)\______)
+    A open source project for create you own BB-8!
+ ###################################################
 
  https://github.com/Gruniek/BB-UNIT
  Made by Daniel M/Gruniek/MOUS
