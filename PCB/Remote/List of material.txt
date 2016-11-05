@@ -1,0 +1,27 @@
+ ##################################################
+ #                     BB-UNIT                    #
+ # A open source project for create you own BB-8! #
+ ##################################################
+ 
+ https://github.com/Gruniek/bb-unit
+ Made by Daniel M/Gruniek/MOUS
+ 
+ Compatible only with an Arduino Nano and the specific PCB.
+ FIRMWARE Link : https://github.com/Gruniek/OPEN-BB-X/blob/master/Head/Stabiliser/Arduino-firmware/bb-8-Head-stabiliser-controller.ino
+ 
+ --------------
+ - Change log -
+ --------------
+ 
+ 10/1016
+ ==========
+ - PCB Complete PCB for this firmware
+ 
+ 
+  #####################################################
+  Big thanks for http://r2builders.fr/ !
+  Initial project : http://r2builders.fr/forum/viewtopic.php?f=26&t=3928&hilit=BB8+par+MOUS
+  #####################################################
+  
+  LIST OF MATERIAL
+  ================
