@@ -4,11 +4,11 @@ String version = "0.1.2";
  A open source BB-8 for create you own BB-8!
  ###########################################
 
- https://github.com/Gruniek/OPEN-BB-X
- Made by Daniel M/Gruniek/
+ https://github.com/Gruniek/BB-UNIT
+ Made by Daniel M/Gruniek/MOUS
  
  Compatible only with an Arduino Nano and the specific PCB.
- PCB Link : https://github.com/Gruniek/OPEN-BB-X/tree/master/Head/Stabiliser/PCB
+ PCB Link : https://github.com/Gruniek/BB-UNIT/tree/master/Head/Stabiliser/PCB
  
  --------------
  - Change log -
