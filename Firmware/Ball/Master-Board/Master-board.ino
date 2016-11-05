@@ -1,6 +1,6 @@
 String version = "0.1.1";
 /*
-
+http://shanes.net/another-nrf24l01-sketch-string-sendreceive/
  >      FIRMWARE ONLY FOR AN ARDUINO NANO !!    <
  > IF YOU USE ANOTHER ARDUINO, ADAPT THE PINOUT <
  
