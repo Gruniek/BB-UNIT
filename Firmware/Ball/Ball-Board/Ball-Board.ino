@@ -624,97 +624,97 @@ void loop()
     	    if(directX) directX = false;
     	    else directX = true;
   	}
-  		digitalWrite(pinDirX, directX); // dirX
+  	digitalWrite(pinDirX, directX); // dirX
   
-  		// Si ont doit demarer le moteur
-  		if(x > (setpointX + hysteresis) || (x < setpointX - hysteresis )) 
-  		{ 
-    		if(x > minX && x < maxX) runX = true; 
-    		else runX = false;
-  		}
-  		else runX = false;
+  	// Si ont doit demarer le moteur
+  	if(x > (setpointX + hysteresis) || (x < setpointX - hysteresis )) 
+  	{ 
+    	    if(x > minX && x < maxX) runX = true; 
+    	    else runX = false;
+  	}
+  	else runX = false;
  
-  		// Calcul du PID X
-  		if(x < 90) vx = (90 - x); 
-  		if(x == 0) vx = 0;
-  		if(x > 90) vx = (x - 90);
+  	// Calcul du PID X
+  	if(x < 90) vx = (90 - x); 
+  	if(x == 0) vx = 0;
+  	if(x > 90) vx = (x - 90);
   
-  		speedX = 1000 / (vx);
-  		speedX = speedX * multiplier; // DEL
-  		if(speedX < 15) speedX = 15;
+  	speedX = 1000 / (vx);
+  	speedX = speedX * multiplier; // DEL
+  	if(speedX < 15) speedX = 15;
   
-		// Mise en route du moteur
-  		unsigned long currentX = millis();
+	// Mise en route du moteur
+  	unsigned long currentX = millis();
   		
     	if (currentX - previousMillisX >= speedX) 
     	{
-      		previousMillisX = currentX;
-      
-      		if(runX)
-      		{
-        		digitalWrite(pinStepX, 1);
-        		delayMicroseconds( 500 );
-        		digitalWrite(pinStepX, 0);
-    	 		delayMicroseconds( 500 );
-      		}
-  		}
+      	    previousMillisX = currentX;
+
+	    if(runX)
+      	    {
+                digitalWrite(pinStepX, 1);
+        	delayMicroseconds( 500 );
+        	digitalWrite(pinStepX, 0);
+    	 	delayMicroseconds( 500 );
+            }
+  	}
 
     	//======================================================================
-		// Y88b   d88P 
-		//  Y88b d88P  
-  		//   Y88o88P   
-   		//    Y888P    
+	// Y88b   d88P 
+	//  Y88b d88P  
+  	//   Y88o88P   
+   	//    Y888P    
     	//     888     
     	//     888     
         //     888     
         //     888  
-		//======================================================================
-		
-  		// Direction
-  		if(y < 90) directY = false;
-  		else directY = true;
-  		if(invertY) 
-  		{
-    		if(directY) directY = false;
-    		else directY = true;
-  		}
-  		digitalWrite(pinDirY, directY);
+	//======================================================================
+	
+	// Direction
+  	if(y < 90) directY = false;
+  	else directY = true;
+  	if(invertY) 
+  	{
+    	    if(directY) directY = false;
+    	    else directY = true;
+  	}
+  	digitalWrite(pinDirY, directY);
   
-		// Si ont doit demarer le moteur
-  		if(y > (setpointY + hysteresis) || (y < setpointY - hysteresis )) 
-  		{ 
-    		if(y > minY && y < maxY) runY = true; 
-    		else runY = false;
-  		}
-  		else runY = false;
+	// Si ont doit demarer le moteur
+  	if(y > (setpointY + hysteresis) || (y < setpointY - hysteresis )) 
+  	{ 
+    	    if(y > minY && y < maxY) runY = true; 
+    	    else runY = false;
+  	}
+  	else runY = false;
   
-  		// Calcul du PID Y
-  		if(y < 90) vy = (90 - y); 
-  		if(y == 0) vy = 0;
-  		if(y > 90) vy = (y - 90);
+  	// Calcul du PID Y
+  	if(y < 90) vy = (90 - y); 
+  	if(y == 0) vy = 0;
+  	if(y > 90) vy = (y - 90);
   
-  		speedY = 1000 / (vy);
-  		speedY = speedY * multiplier; // DEL
-  		if(speedY < 15) speedY = 15;
+  	speedY = 1000 / (vy);
+  	speedY = speedY * multiplier; // DEL
+  	if(speedY < 15) speedY = 15;
  
-  		// Mise en route du moteur
-  		unsigned long currentY = millis(); // millis();
+	// Mise en route du moteur
+  	unsigned long currentY = millis(); // millis();
 
     	if (currentY - previousMillisY >= speedY) 
     	{
-      		previousMillisY = currentY;
+      	    previousMillisY = currentY;
       
-      		if(runY)
-      		{
-        		digitalWrite(pinStepY, 1);
-        		delayMicroseconds( 500 );
-        		digitalWrite(pinStepY, 0);
-        		delayMicroseconds( 500 );
-      		}
-  		} 
+            if(runY)
+      	    {
+        	digitalWrite(pinStepY, 1);
+        	delayMicroseconds( 500 );
+        	digitalWrite(pinStepY, 0);
+        	delayMicroseconds( 500 );
+            }
+  	} 
   
     	//======================================================================
-		// 8888888888P 
+	// 8888888888P 
         //       d88P  
         //      d88P   
     	//     d88P    
@@ -722,35 +722,32 @@ void loop()
         //   d88P      
         //  d88P        
         // d8888888888 
-		//======================================================================  		
+	//======================================================================  		
 		
-		digitalWrite(pinDirZ, directZ);
-		if(speedZ != 0)
-  		{
-  			unsigned long currentZ = millis();
-  			if (currentZ - previousMillisZ >= speedZ) 
-    		{
-      			previousMillisZ = currentZ;
+	digitalWrite(pinDirZ, directZ);
+	if(speedZ != 0)
+  	{
+  	    unsigned long currentZ = millis();
+  		
+	    if (currentZ - previousMillisZ >= speedZ) 
+    	    {
+      		previousMillisZ = currentZ;
   
-    	 		digitalWrite(pinStepY, 1);
+		digitalWrite(pinStepY, 1);
     	    	delayMicroseconds( 500 );
     	    	digitalWrite(pinStepY, 0);
     	    	delayMicroseconds( 500 );
     	    	if(directZ) Zangle++;
     	    	else Zangle--;
-  			} 
-  		}
-  		if(Zangle == 201) Zangle = 0;
-  		if(Zangle == -1)  Zangle = 0;
-  		
-  
-  }
- 
+  	    } 
+  	}
+  	
+	if(Zangle == 201) Zangle = 0;
+  	if(Zangle == -1)  Zangle = 0;
+	    
+    }
 
-  
-
-  
-  	// SEND SERIAL DATA
+    // TRIGGER / SEC
     //-------------------------------------------------------------------------// 
     unsigned long currentS = millis(); // millis();
 
@@ -763,24 +760,18 @@ void loop()
     	else LED_PING = true;
     	digitalWrite(PING, LED_PING);
     	
-    	
-  
-    	
-    	
-    	
+	// IF THE MPU6050 ARE ALWAYS CONNECTED, IF NOT, HE RECONNECT AUTOMATICLY
     	if(!accelgyro.testConnection());
     	{
-    		production = false;
-    		emgStop = true;
-    		accelgyro.initialize();
-    		if(accelgyro.testConnection())
-    		{
-    			production = true;
-    		}
+    	    production = false;
+    	    emgStop = true;
+    	    accelgyro.initialize();
+    	    if(accelgyro.testConnection())
+    	    {
+    		production = true;
+    	    }
     	}
-    	
-    	
-    	
+     	
     	/*
     	
     	// SEND STATUT
@@ -802,5 +793,38 @@ void loop()
     	Serial.println(" ");
     	
     	*/
-    }
+    } // ENF OF PRODUCTION
+} // END OF LOOP
+
+// VOID FOR TAKE THE CURRENT
+int current(int Cpin)
+{
+    int mVperAmp = 185; // use 100 for 20A Module and 66 for 30A Module
+    int RawValue= 0;
+    int ACSoffset = 2500; 
+    double Voltage = 0;
+    double Amps = 0;
+
+    RawValue = analogRead(Cpin);
+    Voltage = (RawValue / 1024.0) * 5000; // Gets you mV
+    Amps = ((Voltage - ACSoffset) / mVperAmp);
+ 
+    return(Amps);
+}
+
+// VOID FOR TAKE THE BATTERY VOLTAGE
+int voltage(int Vpin)
+{
+    float vout = 0.0;
+    float vin = 0.0;
+    float R1 = 100000.0; // resistance of R1 (100K) -see text!
+    float R2 = 10000.0; // resistance of R2 (10K) - see text!
+    int value = 0;
+
+    value = analogRead(Vpin);
+    vout = (value * 5.0) / 1024.0;
+    vin = vout / (R2/(R1+R2)); 
+    if (vin<0.09) vin=0.0;
+   
+    return(vin);
 }
