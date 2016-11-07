@@ -41,25 +41,43 @@ http://www.electroschematics.com/9351/arduino-digital-voltmeter/
   EXEMPLE COMMAND 
   ===============
   
+  Argument List
+  
+  a = Speed Motor A       / Step per second
+  b = Speed Motor B       / Step per second
+  c = Direction Motor A  / 1 = Front | 0 = Back
+  d = direction motor B  / 1 = Front | 0 = Back
+  
 */
 
-#include "Wire.h"
-#include "MPU6050.h"
-
-#include <SPI.h>
-#include <nRF24L01.h>
-#include <RF24.h>
-#include <RF24_config.h>
-#include "PCF8574.h"
+#include "Wire.h"       .// For I2C
+#include "MPU6050.h"     // For the gyroscope MPU6050
+#include "PCF8574.h"     // For the PCF8574
+ 
+#include <SPI.h>         // For the SPI
+#include <nRF24L01.h>    // For the Wireless remote controll i/o
+#include <RF24.h>        // Idem
+#include <RF24_config.h> // Idem
 
 int i2cAdress      = 1;
 
 int pinDirA        = 2;      // PIN DIRECTION FOR X 
 int pinStepA       = 3;      // PIN STEP FOR X
+
 int pinEnable      = 4;      // Activation off all stepper
 
 int pinDirB        = 5;      // PIN DIRECTION FOR Y
 int pinStepB       = 6;      // PIN STEP FOR Y
+
+int speedA         = 0;
+int speedB         = 0;
+bool runA          = false;
+bool runB          = false;
+bool dirA          = true;   // true = Front | false = back
+bool dirB          = true;   // true = Front | false = back
+
+bool invertA       = false;
+bool invertB       = false;
 
 int CurrentBat1    = 0;
 int CurrentBat2    = 1;
@@ -76,6 +94,19 @@ bool tmpPing2      = false;
 bool ifPing        = false;
 bool emgStop       = false;
 bool production    = false;
+
+int setpointX      = 0;
+int setpointY      = 0;
+int multiplier     = 0;
+int hysteresis     = 0;
+bool invertXY      = 0;
+bool invertX       = 0;
+bool invertY       = 0;
+
+unsigned long currentA = 0;
+unsigned long previousMillisA = 0;
+unsigned long currentB = 0;
+unsigned long previousMillisB = 0;
 
 unsigned long trigSec  = 1000;
 unsigned long trigS    = 0;
@@ -119,37 +150,47 @@ void setup()
     pinMode( PING        , OUTPUT );
 
 	Serial.begin(9600);
-	Serial.println("Booting up...");
-    Serial.println(" ");
-    Serial.println("_ Astromech Industrie _");
-    Serial.print("  BB-8 Version ");
-    Serial.println(version);
-    Serial.println("===================");
-    Serial.println(" ");
+	
+	    
+    Serial.println("==================================================");
+	Serial.println("  _______ ______     _     _  ______  ____ ______ "); 
+	Serial.println(" (____   (____  )   | |   | |/ ___  |(____|______)");
+	Serial.println("  ____)  )____)  )__| |   | | |   | | | |   | |   ");      
+	Serial.println(" |  __  (|  __  (___) |   | | |   | | | |   | |   ");
+	Serial.println(" | |__)  ) |__)  )  | |___| | |   | |_| |_  | |   ");
+	Serial.println(" |______/|______/   |______/|_|   |_(_____) |_|   ");
+	Serial.println("            _ Astromech Industrie _               ");
+	Serial.println("      > https://github.com/Gruniek/BB-UNIT <      ");
+	Serial.println("           > http://r2builders.fr/ <              ");
+	Serial.print("           FIRMWARE VERSION : ");
+	Serial.print(version);
+	Serial.println("               ");
+    Serial.println("==================================================");
     
+    Serial.println(" ");
+	Serial.println("[1]-Booting up...");
 
-
-    
-    Serial.print("Initializing I2C devices...  I2C ADRESS :");
+    Serial.print("[2]-Initializing I2C devices...  I2C ADRESS : ");
     Serial.print(i2cAdress);
   
     Wire.begin(i2cAdress);
     
+    Serial.println("[3]-Connect to the MPU6050... ");
     accelgyro.initialize();
-	Serial.println(" [ OK ]");
-
-    Serial.print("Connect to the MPU6050 : ");
-    Serial.println(accelgyro.testConnection());
-    //Serial.println(accelgyro.testConnection() ? "Connection successful" : "Connection failed");
     
-    Serial.println("Initializing RF24 devices...  ");
+    //Serial.println(accelgyro.testConnection());
+    Serial.println(accelgyro.testConnection() ? "Connection successful" : "Connection failed");
+    
+    Serial.println("[4]-Initializing RF24 devices...  ");
     radio.begin();
     radio.openWritingPipe(pipe);
     radio.startListening();
     
     /* Start I2C bus and PCF8574 instance */
+    Serial.print("[5]-Initializing PCF8574...");
   	expander.begin(0x20);
-  
+  	
+    Serial.print("[6]-Setup pinout of the PCF8574...");
   	/* Setup some PCF8574 pins for demo */
   	expander.pinMode(0, OUTPUT);
   	expander.pinMode(1, OUTPUT);
@@ -159,28 +200,16 @@ void setup()
     expander.pinMode(5, OUTPUT);
     expander.pinMode(6, OUTPUT);
     expander.pinMode(7, OUTPUT);
-    
-    Serial.println("Booting successful !");
-    Serial.println("====================");
+
+    Serial.println("========================");    
+    Serial.println("[7]-Booting successful !");
+    Serial.println("========================");
 	
 }
 
 void loop()
 {
-	/* SEND
-	String theMessage = "Hello there!";
-	int messageSize = theMessage.length();
-	for (int i = 0; i < messageSize; i++) 
-	{
-    	int charToSend[1];
-    	charToSend[0] = theMessage.charAt(i);
-    	radio.write(charToSend,1);
-  	}  
- 
-	msg[0] = 2; 
-    radio.write(msg,1);
-    */
-    
+	// GET DATA FROM REMOTE
     if (radio.available())
     {
     	bool done = false;  
@@ -201,7 +230,7 @@ void loop()
 			// Copy it over 
 			theMessage.toCharArray(msg, str_len);
        		
-    		if (strcmp(strtok(msg, " "), "SET") == 0)
+    		if (strcmp(strtok(msg, " "), "MOVE") == 0)
     		{
         		Serial.println("UPDATE SETPOINT");
       			// trouvé le message
@@ -211,28 +240,143 @@ void loop()
         			int val = atoi(p + 1);
         			switch (*p)
         			{
-          			//	case 'x': setpointX  = val; break;
-          			//	case 'y': setpointY  = val; break;
-      	  			//	case 'm': multiplier = val; break;
-      				//	case 'i': invertXY   = val; break;
-      				//	case 'j': invertX    = val; break;
-      				//	case 'k': invertX    = val; break;
-      				//	case 'h': hysteresis = val; break;
+          				case 'a': speedA  = val; break;
+          				case 'b': speedB  = val; break;
+      	  				case 'c': dirA    = val; break;
+      					case 'd': dirB    = val; break;
         			}
       			}
     		}
+       		
+       		if (strcmp(strtok(msg, " "), "HEADSET") == 0)
+    		{
+        		Serial.println("UPDATE SETPOINT");
+      			// trouvé le message
+      			char *p;
+      			while ((p = strtok(NULL, " ")) != NULL)
+      			{
+        			int val = atoi(p + 1);
+        			switch (*p)
+        			{
+          				case 'x': setpointX  = val; break;
+          				case 'y': setpointY  = val; break;
+      	  				case 'm': multiplier = val; break;
+      					case 'i': invertXY   = val; break;
+      					case 'j': invertX    = val; break;
+      					case 'k': invertY    = val; break;
+      					case 'h': hysteresis = val; break;
+        			}
+      			}
+    		}
+    		Serial.print("SET x");
+    		Serial.print(setpointX);
+    		Serial.print(" y");
+    		Serial.print(setpointY);
+    		Serial.print(" m");
+    		Serial.print(multiplier);
+    		Serial.print(" i");
+    		Serial.print(invertXY);
+    		Serial.print(" j");
+    		Serial.print(invertX);
+    		Serial.print(" k");
+    		Serial.print(invertY);
+    		Serial.print(" h");
+    		Serial.println(hysteresis);
+       		
+       		
+       		if (strcmp(strtok(msg, " "), "HEADROTATE") == 0)
+    		{
+        		Serial.println("UPDATE SETPOINT");
+      			// trouvé le message
+      			char *p;
+      			while ((p = strtok(NULL, " ")) != NULL)
+      			{
+        			int val = atoi(p + 1);
+        			switch (*p)
+        			{
+          				case 'd': setpointX  = val; break;
+          				case 's': setpointY  = val; break;
+        			}
+      			}
+    		}
+    		Serial.print("ROTATE d");
+    		Serial.print(setpointX);
+    		Serial.print(" y");
+    		Serial.print(setpointY);
+    		Serial.print(" m");
+    		Serial.print(multiplier);
+    		Serial.print(" i");
+    		Serial.print(invertXY);
+    		Serial.print(" j");
+    		Serial.print(invertX);
+    		Serial.print(" k");
+    		Serial.print(invertY);
+    		Serial.print(" h");
+    		Serial.println(hysteresis);
+       		
        		theMessage= ""; 
       	}
    }
    
    
-   
-   
-   
-   
-   
-   
-   
+	// MOTOR A (Left)
+	// Run the motor
+	if(speedA > 0) runA = true;
+	else runA = false;
+	speedA = 1000 / speedA;
+	
+	// Motor direction / With inversion
+	if(invertA) 
+  	{
+    	if(dirA) dirA = false;
+    	else dirA = true;
+  	}
+	digitalWrite(pinDirA, dirA); // Set the direction
+	
+	// Send Step inpultion to the motor
+	unsigned long currentA = millis(); // millis();
+   	if (currentA - previousMillisA >= speedA) 
+   	{
+      	previousMillisA = currentA;
+      
+      	if(runA)
+      	{
+        	digitalWrite(pinStepA, 1);
+        	delayMicroseconds( 500 );
+        	digitalWrite(pinStepA, 0);
+        	delayMicroseconds( 500 );
+      	}
+  	} 
+
+	// MOTOR B (Right)
+	// Run the motor
+	if(speedB > 0) runB = true;
+	else runB = false;
+	speedB = 1000 / speedB;
+	
+	// Motor direction / With inversion
+	if(invertB) 
+  	{
+    	if(dirB) dirB = false;
+    	else dirB = true;
+  	}
+	digitalWrite(pinDirB, dirB); // Set the direction
+	
+	// Send Step inpultion to the motor
+	unsigned long currentB = millis(); // millis();
+   	if (currentB - previousMillisB >= speedB) 
+   	{
+      	previousMillisB = currentB;
+      
+      	if(runB)
+      	{
+        	digitalWrite(pinStepB, 1);
+        	delayMicroseconds( 500 );
+        	digitalWrite(pinStepB, 0);
+        	delayMicroseconds( 500 );
+      	}
+  	} 
+	
    
    
    
@@ -286,6 +430,21 @@ void loop()
     			production = true;
     		}
     	}
+    	
+    	
+    	// SEND RF24 //
+		String theMessage = "Hello there!";
+		int messageSize = theMessage.length();
+		for (int i = 0; i < messageSize; i++) 
+		{
+    		int charToSend[1];
+    		charToSend[0] = theMessage.charAt(i);
+    		radio.write(charToSend,1);
+  		}  
+ 
+		msg[0] = 2; 
+    	radio.write(msg,1);
+    
     }
   
 }
