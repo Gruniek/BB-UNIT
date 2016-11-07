@@ -53,12 +53,8 @@ String version = "0.2.1";
 	k = INVERT the direction of Y
 	h = SET a new HYSTERESSIS 
 
-
-
   < BOOT > 
   'BOOT \n'  // LAUNCH TEST for X, Y and Z -> Return X and Y to initial SETPOINT (x90 y90 ) and Z to ZERO
-
-
 
   < RUN >
   'RUN \n'   // RUN the code in production mode (Recieved all data, X and Y runing for the SETPOINT poistion and Z folow the remote controll
@@ -66,13 +62,14 @@ String version = "0.2.1";
   < STOP >   
   'STOP \n'  // STOP the production mode. All motors are stopped.
   
-  
   < ROTATE >
   'ROTATE d1 s100 \n'   // ROTATE Z motor on the RIGHT DIRECTION (d0 LEFT, d1 RIGHT) WITH the SPEED at 1000/100 = 10 step/sec = 18dec/sec
   
-  
   < STAT >
-  // It is all data SENDED to the MASTER-BOARD
+  // It is all data SENDED to the remote
+  
+  < ENABLE > 
+  'ENABLE a1 x1 z1 \n'    // ENABLE MOTOR AB, XY and Z (a = AB, x=XY, z = Z | 0 = desabled | 1 = enabled )
   
 */
 
@@ -82,9 +79,15 @@ String version = "0.2.1";
 #include <nRF24L01.h>
 #include <RF24.h>
 
+
+// RF24
 RF24 radio(54, 55);
 
+// MPU6050
+MPU6050 accelgyro;
 
+int16_t ax, ay, az;
+int16_t gx, gy, gz;
 
 // MOTOR CONFIGURATION // YOU CAN TOUCH THIS 
 
@@ -140,23 +143,6 @@ int     hysteresis     = 1;     // HYSTERESSIS FOR THE ANGLE CALCULATION
 #define CurrentBat4      3
 #define Pinvoltage       6
 
-
-
-
-
-
-
-
-
-
-
-
-// MPU6050
-MPU6050 accelgyro;
-
-int16_t ax, ay, az;
-int16_t gx, gy, gz;
-
 // I2C
 int adress         = 2;
 
@@ -198,6 +184,17 @@ bool xok           = false;
 bool yok           = false;
 bool zok           = false;
 
+long intX          = 0;
+long intY          = 0; 
+
+bool production    = false;
+bool LED_PING      = false;
+bool BOOT          = false;
+
+bool enMotAB       = false;
+bool enMotXY       = false;
+bool enMotZ        = false;
+
 unsigned long previousMillisX = 0;
 unsigned long previousMillisY = 0;
 unsigned long previousMillisZ = 0;
@@ -211,22 +208,14 @@ unsigned long trigSec  = 1000;
 unsigned long trigG    = 0;
 unsigned long trigS    = 0;
 
-long                    intX  = 0;
-long                    intY  = 0; 
-bool production = false;
-bool LED_PING   = false;
-bool BOOT = false;
-
-bool enMotAB       = false;
-bool enMotXY       = false;
-bool enMotZ        = false;
 
 //=============================================================================//
 //   SETUP
 //=============================================================================//
 void setup()
 {
-	pinMode( pinEnableAB , OUTPUT );
+    // PINMODE
+    pinMode( pinEnableAB , OUTPUT );
     pinMode( pinEnableXY , OUTPUT );
     pinMode( pinEnableZ  , OUTPUT );
     pinMode( pinDirX     , OUTPUT );
@@ -241,58 +230,49 @@ void setup()
     
     pinMode( Z_POSITION  , INPUT  );
     
-    
-    
-	Serial.begin(9600);
-	
-	    
+    // SERIAL
+    Serial.begin(9600);
+
+    // Blabla, blablabla
     Serial.println("==================================================");
-	Serial.println("  _______ ______     _     _  ______  ____ ______ "); 
-	Serial.println(" (____   (____  )   | |   | |/ ___  |(____|______)");
-	Serial.println("  ____)  )____)  )__| |   | | |   | | | |   | |   ");      
-	Serial.println(" |  __  (|  __  (___) |   | | |   | | | |   | |   ");
-	Serial.println(" | |__)  ) |__)  )  | |___| | |   | |_| |_  | |   ");
-	Serial.println(" |______/|______/   |______/|_|   |_(_____) |_|   ");
-	Serial.println("            _ Astromech Industrie _               ");
-	Serial.println("      > https://github.com/Gruniek/BB-UNIT <      ");
-	Serial.println("           > http://r2builders.fr/ <              ");
-	Serial.print("           FIRMWARE VERSION : ");
-	Serial.print(version);
-	Serial.println("               ");
+    Serial.println("  _______ ______     _     _  ______  ____ ______ "); 
+    Serial.println(" (____   (____  )   | |   | |/ ___  |(____|______)");
+    Serial.println("  ____)  )____)  )__| |   | | |   | | | |   | |   ");      
+    Serial.println(" |  __  (|  __  (___) |   | | |   | | | |   | |   ");
+    Serial.println(" | |__)  ) |__)  )  | |___| | |   | |_| |_  | |   ");
+    Serial.println(" |______/|______/   |______/|_|   |_(_____) |_|   ");
+    Serial.println("            _ Astromech Industrie _               ");
+    Serial.println("      > https://github.com/Gruniek/BB-UNIT <      ");
+    Serial.println("           > http://r2builders.fr/ <              ");
+    Serial.print("           FIRMWARE VERSION : ");
+    Serial.print(version);
+    Serial.println("               ");
     Serial.println("==================================================");
     
     Serial.println(" ");
-	Serial.println("[1]-Booting up...");
-    
-
-
-    
+    Serial.println("[1]-Booting up...");
+   
+    // Start of the I2C protocol
     Serial.print("[2]-Initializing I2C devices...  I2C ADRESS :");
     Serial.print(adress);
-  
     Wire.begin(adress);
     
-    
-
-
+    // Start the MPU6050 Gyroscope
     Serial.print("[3]-Connect to the MPU6050 : ");
     accelgyro.initialize();
     //Serial.println(accelgyro.testConnection());
     Serial.println(accelgyro.testConnection() ? "Connection successful" : "Connection failed");
     
+    // Start the RF24 Radio controll
     Serial.println("[4]-Initializing RF24 devices...  ");
     radio.begin();
     radio.openReadingPipe(0, 00001);
- 
     radio.startListening();
- 
- 
- 
+ 	
+    // END OF BOOT/SETUP
     Serial.println("====================");    
     Serial.println("Booting successful !");
     Serial.println("====================");
-    
-
 }
 
 //=============================================================================//
@@ -300,29 +280,28 @@ void setup()
 //=============================================================================//
 void loop()
 {
-    // GET MOTION
-    //-------------------------------------------------------------------------//
     unsigned long currentG = millis(); // millis();
 
     if (currentG - trigG  >= trigGyro) 
     {
     	trigG = currentG;
       
-      
+         // GET MOTION
+         //-------------------------------------------------------------------------// 
     	accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-		if(invertXY)
-		{
-			y = (((ax/180)+etalonX)+90);
-  			x = (((ay/180)+etalonY)+90);
-		}
-		else
-		{
-			x = (((ax/180)+etalonX)+90);
-  			y = (((ay/180)+etalonY)+90);
-		}
+	if(invertXY)
+	{
+	    y = (((ax/180)+etalonX)+90);
+  	    x = (((ay/180)+etalonY)+90);
+	}
+	else
+	{
+	    x = (((ax/180)+etalonX)+90);
+  	    y = (((ay/180)+etalonY)+90);
+	}
     }
   
-    // GET SERIAL DATA
+    // GET SERIAL AND RF24 DATA
     //-------------------------------------------------------------------------//
 	  
     char msg[64];
@@ -330,63 +309,62 @@ void loop()
     {
     	Serial.readBytesUntil('\n', msg, sizeof msg);
     	newData = true;
-	}
+    }
 	
-	if (radio.available())
+    if (radio.available())
     {
     	char msg[64] = {0};
     	radio.read(&msg, sizeof(msg));
     	newData = true;
     }
 	
-	if(newData)
-	{
-		Serial.println(msg);
-		newData = false;
+    if(newData)
+    {
+	Serial.println(msg);
+	newData = false;
 		
     	if (strcmp(strtok(msg, " "), "SET") == 0)
     	{
-        	Serial.println("UPDATE SETPOINT");
-      		// trouvé le message
-      		char *p;
-      		while ((p = strtok(NULL, " ")) != NULL)
-      		{
-        		int val = atoi(p + 1);
-        		switch (*p)
-        		{
-          			case 'x': setpointX  = val; break;
-          			case 'y': setpointY  = val; break;
-      	  			case 'm': multiplier = val; break;
-      				case 'i': invertXY   = val; break;
-      				case 'j': invertX    = val; break;
-      				case 'k': invertX    = val; break;
-      				case 'h': hysteresis = val; break;
-        		}
-      		}
+            Serial.println("UPDATE SETPOINT");
+      	    // trouvé le message
+      	    char *p;
+      	    while ((p = strtok(NULL, " ")) != NULL)
+      	    {
+       		int val = atoi(p + 1);
+       		switch (*p)
+       		{
+		    case 'x': setpointX  = val; break;
+          	    case 'y': setpointY  = val; break;
+      	  	    case 'm': multiplier = val; break;
+      		    case 'i': invertXY   = val; break;
+      		    case 'j': invertX    = val; break;
+      		    case 'k': invertX    = val; break;
+      		    case 'h': hysteresis = val; break;
+        	}
+      	    }
     	}
     
     	if (strcmp(strtok(msg, " "), "RUN") == 0)
     	{
-        	Serial.println("ROll BB-8 ROLL !");
+            Serial.println("ROll BB-8 ROLL !");
       	    production = true;
     	}
     
     	if (strcmp(strtok(msg, " "), "STOP") == 0)
     	{
-    		Serial.println("STOP");
+    	    Serial.println("STOP");
     	    production = false;
     	}
     	
     	if (strcmp(strtok(msg, " "), "RESET") == 0)
     	{
-    		Serial.println("RESET");
+    	    Serial.println("RESET");
     	    production = false;
     	    emgStop    = false;
     	}
     	
     	if (strcmp(strtok(msg, " "), "BOOT") == 0)
-    	{
-    		
+    	{	
     	    BOOT = true;
     	    Serial.println("BOOTING UP...");
     	    delay(2000);
@@ -394,55 +372,55 @@ void loop()
     	
     	if (strcmp(strtok(msg, " "), "ROTATE") == 0) // ROTATE d1 s100  <-- Rotate Z right, 18c/sec
     	{
-      		// trouvé le message
-      		char *p;
-      		while ((p = strtok(NULL, " ")) != NULL)
-      		{
-        		int val = atoi(p + 1);
-        		switch (*p)
-        		{
-          			case 'd': directZ  = val; break;
-          			case 's': speedZ   = val; break;
-        		}
-      		}
+      	    // trouvé le message
+      	    char *p;
+      	    while ((p = strtok(NULL, " ")) != NULL)
+      	    {
+                 int val = atoi(p + 1);
+        	 switch (*p)
+        	 {
+          	     case 'd': directZ  = val; break;
+          	     case 's': speedZ   = val; break;
+                 }
+            }
     	}
     	
     	if (strcmp(strtok(msg, " "), "MOVE") == 0)
-    		{
-        		Serial.println("UPDATE SETPOINT");
-      			// trouvé le message
-      			char *p;
-      			while ((p = strtok(NULL, " ")) != NULL)
-      			{
-        			int val = atoi(p + 1);
-        			switch (*p)
-        			{
-          				case 'a': speedA  = val; break;
-          				case 'b': speedB  = val; break;
-      	  				case 'c': dirA    = val; break;
-      					case 'd': dirB    = val; break;
-        			}
-      			}
-    		}
+    	{
+            Serial.println("UPDATE SETPOINT");
+      	    // trouvé le message
+      	    char *p;
+      	    while ((p = strtok(NULL, " ")) != NULL)
+      	    {
+                int val = atoi(p + 1);
+        	switch (*p)
+        	{
+          	     case 'a': speedA  = val; break;
+          	     case 'b': speedB  = val; break;
+      	  	     case 'c': dirA    = val; break;
+      		     case 'd': dirB    = val; break;
+        	}
+      	    }
+        }
     	
     	if (strcmp(strtok(msg, " "), "ENABLE") == 0)
     	{
-       		//Serial.println("UPDATE SETPOINT");
-  			// trouvé le message
-  			char *p;
-      		while ((p = strtok(NULL, " ")) != NULL)
-   			{
-      			int val = atoi(p + 1);
-        		switch (*p)
-        		{
-        	  		case 'a': enMotAB  = val; break;
-        	  		case 'x': enMotXY  = val; break;
-      		  		case 'z': enMotZ   = val; break;
-        		}
-      		}
+       	    //Serial.println("UPDATE SETPOINT");
+  	    // trouvé le message
+  	    char *p;
+      	    while ((p = strtok(NULL, " ")) != NULL)
+   	    {
+      	        int val = atoi(p + 1);
+        	switch (*p)
+        	{
+        	    case 'a': enMotAB  = val; break;
+        	    case 'x': enMotXY  = val; break;
+      		    case 'z': enMotZ   = val; break;
+        	}
+      	    }
     	}
     	
-   }
+    }
    
    digitalWrite(pinEnableAB, enMotAB);
    digitalWrite(pinEnableXY, enMotXY);
@@ -450,207 +428,202 @@ void loop()
    
    if(BOOT)
    {
- 		enMotAB = true;
- 		enMotXY = true;
- 		enMotZ  = true;
- 		
-   		
-   	    // SET X IN POSITION
-   		if(x < 90) directX = false;
-  		else directX = true;
+ 	enMotAB = true;
+ 	enMotXY = true;
+ 	enMotZ  = true;
+ 	
+   	// SET X IN POSITION
+   	if(x < 90) directX = false;
+  	else directX = true;
   
-  		if(invertX) 
-  		{
+  	if(invertX) 
+  	{
     		if(directX) directX = false;
     		else directX = true;
-  		}
-  		digitalWrite(pinDirX, directX); // dirX
+  	}
+  	digitalWrite(pinDirX, directX); // dirX
   		
-  		if(x > (setpointX + hysteresis) || (x < setpointX - hysteresis ))
-  		{
-  	        digitalWrite(pinStepX, 1);
-        	delayMicroseconds( 500 );
+  	if(x > (setpointX + hysteresis) || (x < setpointX - hysteresis ))
+  	{
+  	    digitalWrite(pinStepX, 1);
+            delayMicroseconds( 500 );
     	    digitalWrite(pinStepX, 0);
     	    delayMicroseconds( 500 );
-  		}
-  		else
-  		{
-  			if(!xok) 
-  			{
-  				Serial.println("BOOT x1 ");
-  				xok = true;
-  				delay(2000);
-  			}
-  		}
+  	}
+  	else
+  	{
+  	    if(!xok) 
+            {
+  	        Serial.println("BOOT x1 ");
+  		xok = true;
+  		delay(2000);
+ 	    }
+  	}
   		
-  		
-  		// SET Y IN POSITION
-   		if(y < 90) directY = false;
-  		else directY = true;
+        // SET Y IN POSITION
+   	if(y < 90) directY = false;
+  	else directY = true;
   
-  		if(invertY) 
-  		{
-    		if(directY) directY = false;
-    		else directY = true;
-  		}
-  		digitalWrite(pinDirY, directY); // dirX
+	if(invertY) 
+  	{
+    	    if(directY) directY = false;
+    	    else directY = true;
+  	}
+  	digitalWrite(pinDirY, directY); // dirX
   		
-  		if(x > (setpointY + hysteresis) || (y < setpointY - hysteresis ))
-  		{
-  	        digitalWrite(pinStepY, 1);
-        	delayMicroseconds( 500 );
+  	if(x > (setpointY + hysteresis) || (y < setpointY - hysteresis ))
+  	{
+  	    digitalWrite(pinStepY, 1);
+            delayMicroseconds( 500 );
     	    digitalWrite(pinStepY, 0);
     	    delayMicroseconds( 500 );
-  		}
-  		else
-  		{
-  			if(!yok) 
-  			{
-  				Serial.println("BOOT y1 ");
-  				yok = true;
-  				delay(2000);
-  			}
-  		}
+        }
+  	else
+  	{
+  	    if(!yok) 
+  	    {
+  		Serial.println("BOOT y1 ");
+  		yok = true;
+  		delay(2000);
+  	    }
+  	}
   		
-  		// SET Z IN POSITION
-  		
-  		if(!Z_POSITION)
-  		{
-  		  	digitalWrite(pinStepZ, 1);
-        	delayMicroseconds( 500 );
+  	// SET Z IN POSITION
+  	if(!Z_POSITION)
+  	{
+  	    digitalWrite(pinStepZ, 1);
+            delayMicroseconds( 500 );
     	    digitalWrite(pinStepZ, 0);
     	    delayMicroseconds( 500 );	
-  		}
-  		else
-  		{
-  		  	if(!zok) 
-  			{
-  				Serial.println("BOOT z1 ");
-  				zok = true;
-  				Zangle = 0;
-  				delay(2000);
-  			}	
-  		}
+  	}
+  	else
+  	{
+       	    if(!zok) 
+  	    {
+  	        Serial.println("BOOT z1 ");
+  		zok = true;
+  		Zangle = 0;
+  		delay(2000);
+  	    }	
+  	}
   		
-  		if( xok && yok && zok)
-  		{
-			Serial.println("STAT b1 ");
-  			Serial.println("Booting UP OK!");
-  			Serial.println("SEND 'RUN \n' for start the production");
-  			BOOT = false;
-  		}
-  
-  
-   }
+  	if( xok && yok && zok)
+  	{
+	    Serial.println("STAT b1 ");
+  	    Serial.println("Booting UP OK!");
+  	    Serial.println("SEND 'RUN \n' for start the production");
+  	    BOOT = false;
+  	}
+     }
    
-	// PRODUCTION CODE
+    // PRODUCTION CODE
     //-------------------------------------------------------------------------// 
     if(production && !emgStop)  //-
     {
     	enMotAB = true;
- 		enMotXY = true;
- 		enMotZ  = true;
+ 	enMotXY = true;
+ 	enMotZ  = true;
     	
     	//======================================================================
     	//        d8888 
     	//       d88888 
-     	//		d88P888 
-    	//	   d88P 888 
-   		//	  d88P  888 
-  		//   d88P   888 
- 		//	d8888888888 
-		// d88P     888
-		//======================================================================
+     	//	d88P888 
+    	//     d88P 888 
+   	//    d88P  888 
+  	//   d88P   888 
+ 	//  d8888888888 
+	// d88P     888
+	//======================================================================
     	// MOTOR A (Left)
     	
-		// Run the motor
-		if(speedA > 0) runA = true;
-		else runA = false;
-		speedA = 1000 / speedA;
+	// Run the motor
+	if(speedA > 0) runA = true;
+	else runA = false;
+	speedA = 1000 / speedA;
 		
-		// Motor direction / With inversion
-		if(invertA) 
-	  	{
-	    	if(dirA) dirA = false;
-	    	else dirA = true;
-	  	}
-		digitalWrite(pinDirA, dirA); // Set the direction
+	// Motor direction / With inversion
+	if(invertA) 
+  	{
+    	    if(dirA) dirA = false;
+	    else dirA = true;
+	}
+	digitalWrite(pinDirA, dirA); // Set the direction
 		
-		// Send Step inpultion to the motor
-		unsigned long currentA = millis(); // millis();
-	   	if (currentA - previousMillisA >= speedA) 
-	   	{
-	      	previousMillisA = currentA;
-	      
-	      	if(runA)
-	      	{
-	        	digitalWrite(pinStepA, 1);
-	        	delayMicroseconds( 500 );
-	        	digitalWrite(pinStepA, 0);
-	        	delayMicroseconds( 500 );
-	      	}
-	  	} 
+	// Send Step inpultion to the motor
+	unsigned long currentA = millis(); // millis();
+	if (currentA - previousMillisA >= speedA) 
+	{
+	    previousMillisA = currentA;
+	    
+	    if(runA)
+	    {
+	        digitalWrite(pinStepA, 1);
+	        delayMicroseconds( 500 );
+	        digitalWrite(pinStepA, 0);
+	        delayMicroseconds( 500 );
+	    }
+	} 
 	  	
     	//======================================================================
-		// 888888b.   
-		// 888  "88b  
-		// 888  .88P  
-		// 8888888K.  
-		// 888  "Y88b 
-		// 888    888 
-		// 888   d88P 
-		// 8888888P"  
-		//======================================================================	
-		// MOTOR B (Right)
+	// 888888b.   
+	// 888  "88b  
+	// 888  .88P  
+	// 8888888K.  
+	// 888  "Y88b 
+	// 888    888 
+	// 888   d88P 
+	// 8888888P"  
+	//======================================================================	
+	// MOTOR B (Right)
 		
-		// Run the motor
-		if(speedB > 0) runB = true;
-		else runB = false;
-		speedB = 1000 / speedB;
+	// Run the motor
+	if(speedB > 0) runB = true;
+	else runB = false;
+	speedB = 1000 / speedB;
+	
+	// Motor direction / With inversion
+	if(invertB) 
+ 	{
+	    if(dirB) dirB = false;
+	    else dirB = true;
+	}
+	digitalWrite(pinDirB, dirB); // Set the direction
 		
-		// Motor direction / With inversion
-		if(invertB) 
-	  	{
-	    	if(dirB) dirB = false;
-	    	else dirB = true;
-	  	}
-		digitalWrite(pinDirB, dirB); // Set the direction
-		
-		// Send Step inpultion to the motor
-		unsigned long currentB = millis(); // millis();
-	   	if (currentB - previousMillisB >= speedB) 
-	   	{
-	      	previousMillisB = currentB;
+	// Send Step inpultion to the motor
+	unsigned long currentB = millis(); // millis();
+	if (currentB - previousMillisB >= speedB) 
+	{
+	    previousMillisB = currentB;
 	      
-	      	if(runB)
-	      	{
-	        	digitalWrite(pinStepB, 1);
-	        	delayMicroseconds( 500 );
-	        	digitalWrite(pinStepB, 0);
-	        	delayMicroseconds( 500 );
-	      	}
-	  	} 
+	    if(runB)
+	    {
+	        digitalWrite(pinStepB, 1);
+	        delayMicroseconds( 500 );
+	        digitalWrite(pinStepB, 0);
+	        delayMicroseconds( 500 );
+	     }
+	} 
 
     	//======================================================================
-		// Y88b   d88P 
-		//  Y88b d88P  
-		//   Y88o88P   
-		//    Y888P    
-		//    d888b    
-		//   d88888b   
-		//  d88P Y88b  
-		// d88P   Y88b  
-		//======================================================================
+        // Y88b   d88P 
+	//  Y88b d88P  
+	//   Y88o88P   
+	//    Y888P    
+	//    d888b    
+	//   d88888b   
+	//  d88P Y88b  
+	// d88P   Y88b  
+	//======================================================================
   
-		// Direction
-  		if(x < 90) directX = false;
-  		else directX = true;
+	// Direction
+  	if(x < 90) directX = false;
+  	else directX = true;
   
-  		if(invertX) 
-  		{
-    		if(directX) directX = false;
-    		else directX = true;
-  		}
+  	if(invertX) 
+  	{
+    	    if(directX) directX = false;
+    	    else directX = true;
+  	}
   		digitalWrite(pinDirX, directX); // dirX
   
   		// Si ont doit demarer le moteur
