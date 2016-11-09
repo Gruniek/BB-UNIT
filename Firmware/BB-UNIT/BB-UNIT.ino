@@ -254,7 +254,7 @@ void setup()
    
     // Start of the I2C protocol
     Serial.print("[2]-Initializing I2C devices...  I2C ADRESS :");
-    Serial.print(adress);
+    Serial.println(adress);
     Wire.begin(adress);
     
     // Start the MPU6050 Gyroscope
