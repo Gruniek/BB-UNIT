@@ -471,7 +471,7 @@ void loop()
   	}
   	digitalWrite(pinDirY, directY); // dirX
   		
-  	if(x > (setpointY + hysteresis) || (y < setpointY - hysteresis ))
+  	if(y > (setpointY + hysteresis) || (y < setpointY - hysteresis ))
   	{
   	    digitalWrite(pinStepY, 1);
             delayMicroseconds( 500 );
