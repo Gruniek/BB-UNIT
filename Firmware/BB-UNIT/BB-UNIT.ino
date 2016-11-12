@@ -443,7 +443,7 @@ void loop()
   	}
   	digitalWrite(pinDirX, directX); // dirX
   		
-  	if(x > (setpointX + hysteresis) || (x < setpointX - hysteresis ))
+  	if(x > (setpointX + hysteresis) || (x < setpointX - hysteresis || !xok ))
   	{
   	    digitalWrite(pinStepX, 1);
             delayMicroseconds( 500 );
@@ -471,7 +471,7 @@ void loop()
   	}
   	digitalWrite(pinDirY, directY); // dirX
   		
-  	if(y > (setpointY + hysteresis) || (y < setpointY - hysteresis ))
+  	if(y > (setpointY + hysteresis) || (y < setpointY - hysteresis || !yok))
   	{
   	    digitalWrite(pinStepY, 1);
             delayMicroseconds( 500 );
@@ -489,7 +489,7 @@ void loop()
   	}
   		
   	// SET Z IN POSITION
-  	if(!Z_POSITION)
+  	if(!digitalRead(Z_POSITION))
   	{
   	    digitalWrite(pinStepZ, 1);
             delayMicroseconds( 500 );
