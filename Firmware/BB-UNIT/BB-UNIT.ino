@@ -635,9 +635,9 @@ void loop()
   	else runX = false;
  
   	// Calcul du PID X
-  	if(x < 90) vx = (90 - x); 
+  	if(x < setpointX) vx = (setpointX - x); 
   	if(x == 0) vx = 0;
-  	if(x > 90) vx = (x - 90);
+  	if(x > setpointX) vx = (x - setpointX);
   
   	speedX = 1000 / (vx);
   	speedX = speedX * multiplier; // DEL
@@ -689,9 +689,9 @@ void loop()
   	else runY = false;
   
   	// Calcul du PID Y
-  	if(y < 90) vy = (90 - y); 
+  	if(y < setpointY) vy = (setpointY - y); 
   	if(y == 0) vy = 0;
-  	if(y > 90) vy = (y - 90);
+  	if(y > setpointY) vy = (y - setpointY);
   
   	speedY = 1000 / (vy);
   	speedY = speedY * multiplier; // DEL
