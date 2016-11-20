@@ -71,6 +71,11 @@ String version = "0.2.1";
   < ENABLE > 
   'ENABLE a1 x1 z1 \n'    // ENABLE MOTOR AB, XY and Z (a = AB, x=XY, z = Z | 0 = desabled | 1 = enabled )
   
+  
+  
+  FOR AFTER 
+  http://tutorial.cytron.com.my/2014/05/15/wireless-uart-with-arduino-and-433mhz-or-434mhz-module/
+  
 */
 
 #include "Wire.h"
