@@ -75,6 +75,7 @@ String version = "0.2.1";
   
   FOR AFTER 
   http://tutorial.cytron.com.my/2014/05/15/wireless-uart-with-arduino-and-433mhz-or-434mhz-module/
+  note : 10, 11, 12, 13, 14, 15, 50, 51, 52, 53
   
 */
 
