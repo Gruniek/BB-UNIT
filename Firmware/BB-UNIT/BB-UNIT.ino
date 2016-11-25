@@ -1,4 +1,5 @@
-String version = "0.2.1";
+String version = "0.3.1"; // Software Version
+int channel    = 1;       // Remote channel : Put the same of your remote
 /*
   - OPEN BB-X -
  A open source BB-8 for create you own BB-8!
@@ -81,13 +82,24 @@ String version = "0.2.1";
 
 #include "Wire.h"
 #include "MPU6050.h"
-#include <SPI.h>
-#include <nRF24L01.h>
-#include <RF24.h>
+#include "SoftwareSerial.h"
+//#include <SPI.h>
+//#include <nRF24L01.h>
+//#include <RF24.h>
+
+
+//===================//
+// NOW YOU CAN TOUCH //
+//===================//
+
+// HC-12
+bool ifHead = false; // True if the head are wireless connected
+SoftwareSerial remote(10, 11); // RX, TX // For the renote communication
+SoftwareSerial head(12, 13);   // RX, TX // For the head communication
 
 
 // RF24
-RF24 radio(54, 55);
+//RF24 radio(54, 55);
 
 // MPU6050
 MPU6050 accelgyro;
@@ -270,11 +282,21 @@ void setup()
     Serial.println(accelgyro.testConnection() ? "Connection successful" : "Connection failed");
     
     // Start the RF24 Radio controll
-    Serial.println("[4]-Initializing RF24 devices...  ");
-    radio.begin();
-    radio.openReadingPipe(0, 00001);
-    radio.startListening();
- 	
+    //Serial.println("[4]-Initializing RF24 devices...  ");
+    //radio.begin();
+    //radio.openReadingPipe(0, 00001);
+    //radio.startListening();
+ 
+    // Start remote connexion
+    Serial.println("[4]-Initializing HC-12 devices [REMOTE] ");
+    remote.begin(9600);
+
+    // Start remote connexion
+    if(ifhead)
+    {
+	Serial.println("[5]-Initializing HC-12 devices [ HEAD ] ");
+        remote.begin(9600);
+    }
     // END OF BOOT/SETUP
     Serial.println("====================");    
     Serial.println("Booting successful !");
@@ -317,7 +339,7 @@ void loop()
     	newData = true;
     }
 	
-    if (radio.available())
+    if (remote.available()) // IF RF24 ---> radio.available()
     {
     	char msg[64] = {0};
     	radio.read(&msg, sizeof(msg));
