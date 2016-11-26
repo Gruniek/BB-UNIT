@@ -292,7 +292,7 @@ void setup()
     remote.begin(9600);
 
     // Start remote connexion
-    if(ifhead)
+    if(ifHead)
     {
 	Serial.println("[5]-Initializing HC-12 devices [ HEAD ] ");
         remote.begin(9600);
