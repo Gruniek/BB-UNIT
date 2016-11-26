@@ -342,7 +342,7 @@ void loop()
     if (remote.available()) // IF RF24 ---> radio.available()
     {
     	char msg[64] = {0};
-    	radio.read(&msg, sizeof(msg));
+    	radio.readBytesUntil('\n', msg, sizeof msg);
     	newData = true;
     }
 	
