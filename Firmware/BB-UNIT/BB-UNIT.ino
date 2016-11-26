@@ -342,7 +342,7 @@ void loop()
     if (remote.available()) // IF RF24 ---> radio.available()
     {
     	char msg[64] = {0};
-    	radio.readBytesUntil('\n', msg, sizeof msg);
+    	remote.readBytesUntil('\n', msg, sizeof msg); // IF RF24 ---> radio.read(&msg, sizeof(msg));
     	newData = true;
     }
 	
@@ -361,7 +361,7 @@ void loop()
        		int val = atoi(p + 1);
        		switch (*p)
        		{
-		    case 'x': setpointX  = val; break;
+		        case 'x': setpointX  = val; break;
           	    case 'y': setpointY  = val; break;
       	  	    case 'm': multiplier = val; break;
       		    case 'i': invertXY   = val; break;
