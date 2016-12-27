@@ -1,5 +1,7 @@
-String version = "0.3.1"; // Software Version
-int channel    = 1;       // Remote channel : Put the same of your remote
+String FIRMWARE_VERSION = "0.3.3"; // Software Version
+int channel             = 1;       // Remote channel : Put the same of your remote
+
+
 /*
   - OPEN BB-X -
  A open source BB-8 for create you own BB-8!
@@ -14,6 +16,11 @@ int channel    = 1;       // Remote channel : Put the same of your remote
  --------------
  - Change log -
  --------------
+ 12/2016
+ =========
+ - Cleaning variable name
+ - Add RF433Mhz command for the Head and the controller
+ - Add choise the channel
 
  11/2016
  =========
@@ -42,6 +49,9 @@ int channel    = 1;       // Remote channel : Put the same of your remote
   ===============
   EXEMPLE COMMAND
   ===============
+  
+  // IT IS MANDATORY TO ADD 'c<YOUR CHANNEL>' for use commands. //
+  
   < SET >
   'SET x87 y75 h3 \n'        // SET a new setpoint for x and y with 3degree of Hysteressis
   'SET x90 y90 i1 j0 k1 \n'  // SET an inversion of the sensor X Y and invert the direction of X
@@ -55,19 +65,19 @@ int channel    = 1;       // Remote channel : Put the same of your remote
 	h = SET a new HYSTERESSIS
 
   < BOOT >
-  'BOOT \n'  // LAUNCH TEST for X, Y and Z -> Return X and Y to initial SETPOINT (x90 y90 ) and Z to ZERO
+  'BOOT c1\n'  // LAUNCH TEST for X, Y and Z -> Return X and Y to initial SETPOINT (x90 y90 ) and Z to ZERO
 
   < RUN >
-  'RUN \n'   // RUN the code in production mode (Recieved all data, X and Y runing for the SETPOINT poistion and Z folow the remote controll
+  'RUN c1\n'   // RUN the code in production mode (Recieved all data, X and Y runing for the SETPOINT poistion and Z folow the remote controll
 
   < STOP >
-  'STOP \n'  // STOP the production mode. All motors are stopped.
+  'STOP c1\n'  // STOP the production mode. All motors are stopped.
 
   < ROTATE >
-  'ROTATE d1 s100 \n'   // ROTATE Z motor on the RIGHT DIRECTION (d0 LEFT, d1 RIGHT) WITH the SPEED at 1000/100 = 10 step/sec = 18dec/sec
+  'ROTATE d1 s100 c1\n'   // ROTATE Z motor on the RIGHT DIRECTION (d0 LEFT, d1 RIGHT) WITH the SPEED at 1000/100 = 10 step/sec = 18dec/sec
 
   < STAT >
-  // It is all data SENDED to the remote
+  'STAT c1\n' // It is all data SENDED to the remote
 
   < ENABLE >
   'ENABLE a1 x1 z1 \n'    // ENABLE MOTOR AB, XY and Z (a = AB, x=XY, z = Z | 0 = desabled | 1 = enabled )
@@ -88,9 +98,9 @@ int channel    = 1;       // Remote channel : Put the same of your remote
 //#include <RF24.h>
 
 
-//===================//
-// NOW YOU CAN TOUCH //
-//===================//
+//===============//
+// YOU CAN TOUCH //
+//===============//
 
 // HC-12
 bool ifHead = false; // True if the head are wireless connected
@@ -102,10 +112,18 @@ SoftwareSerial head(12, 13);   // RX, TX // For the head communication
 //RF24 radio(54, 55);
 
 // MPU6050
-MPU6050 accelgyro;
+MPU6050 accelgyroIC1(0x68); // HEAD
+MPU6050 accelgyroIC2(0x69); // BODY
+
+//MPU6050 accelgyro;
 
 int16_t ax, ay, az;
 int16_t gx, gy, gz;
+
+
+int16_t axb, ayb, azb;
+int16_t gxb, gyb, gzb;
+
 
 // MOTOR CONFIGURATION // YOU CAN TOUCH THIS
 
@@ -122,6 +140,8 @@ int     MAX_Y          = 135;   // SET THE MAX INCLINAISON FOR Y
 
 int     ETALON_X       = 0;     // AJUSTEMENT FOR X
 int     ETALON_Y       = -6;    // AJUSTEMENT FOR Y
+int     ETALON_B_X     = 0;     // AJUSTEMENT FOR X
+int     ETALON_B_Y     = -6;    // AJUSTEMENT FOR Y
 
 int     HYSTERESIS     = 1;     // HYSTERESSIS FOR THE ANGLE CALCULATION
 
@@ -131,89 +151,102 @@ int     HYSTERESIS     = 1;     // HYSTERESSIS FOR THE ANGLE CALCULATION
 
 //PINOUT
 
-#define PIN_ENABLE_AB    2      // Activation off all stepper
-#define PIN_ENABLE_XY    3
-#define PIN_ENABLE_Z     4
+#define PIN_ENABLE_A     33      // Activation off all stepper
+#define PIN_ENABLE_B     27      // Activation off all stepper
 
-#define PIN_STEP_A       5      // PIN STEP FOR X
-#define pinDirA          6      // PIN DIRECTION FOR X 
+#define PIN_STEP_A       31      // PIN STEP FOR X
+#define PIN_DIR_A        29      // PIN DIRECTION FOR X 
 
-#define pinStepB         7      // PIN STEP FOR X
-#define pinDirB          8      // PIN DIRECTION FOR X 
+#define PIN_STEP_B       25      // PIN STEP FOR X
+#define PIN_DIR_B        23      // PIN DIRECTION FOR X 
 
-#define pinStepX         9      // PIN STEP FOR X
-#define pinDirX          10      // PIN DIRECTION FOR X 
+#define pinStepX         26      // PIN STEP FOR X
+#define pinDirX          24      // PIN DIRECTION FOR X 
 
-#define pinStepY         11      // PIN STEP FOR Y
-#define pinDirY          12      // PIN DIRECTION FOR Y
+#define pinStepY         4       // PIN STEP FOR Y
+#define pinDirY          3       // PIN DIRECTION FOR Y
 
-#define pinStepZ         14      // PIN STEP FOR Y
-#define pinDirZ          15      // PIN DIRECTION FOR Y
+#define pinStepZ         8       // PIN STEP FOR Y
+#define pinDirZ          9       // PIN DIRECTION FOR Y
+#define Z_POSITION       35      // PIN FOR THE DIGITAL INPUT FOR THE HEAD POSITION
 
-#define Z_POSITION       16      // PIN FOR THE DIGITAL INPUT FOR THE HEAD POSITION
+
+#define TRIGGER_LIGHT    36      // PIN TRIGGER FOR START/STOP THE LIGHTING INSIDE THE BALL
+#define LIGHTING         37      // PIN FOR FEED THE LIGHTING
+
+#define SWITCH_1         34      // TRIGGER NOT USED FOR THE MOMENT
+
+#define LED_1            48      // LED 1
+#define LED_2            44      // LED 2
+#define LED_3            40      // LED 3
+#define LED_4            46      // LED 4
+#define LED_5            42      // LED 5
+
 
 #define PING             13
 
 #define LIGHT            20      // Pin for turn on/off lighting on the ball (Great for a technical maintenance ;) )
-#define TRIGGER_LIGHT    21      // Pin trigger for the lighting 
 
-#define CurrentBat1      0
-#define CurrentBat2      1
-#define CurrentBat3      2
-#define CurrentBat4      3
-#define Pinvoltage       6
+#define CURRENT          0
+#define VOLTAGE          6
 
 // I2C
-int adress         = 2;
+int I2C_ADRESS         = 1;
 
 // MOTOR VARIABLE
-int speedA         = 0;
-int speedB         = 0;
-bool runA          = false;
-bool runB          = false;
-bool dirA          = true;   // true = Front | false = back
-bool dirB          = true;   // true = Front | false = back
+int SPEED_A            = 0;
+int SPEED_B            = 0;
+bool RUN_A             = false;
+bool RUN_B             = false;
+bool DIRECTION_A       = true;   // true = Front | false = back
+bool DIRECTION_B       = true;   // true = Front | false = back
 
-int x              = 0;
-int y              = 0;
-int vx             = 0;
-int vy             = 0;
+int x                  = 0;
+int y                  = 0;
+int bx                 = 0;
+int by                 = 0;
+int vx                 = 0;
+int vy                 = 0;
 
-int speedX         = 0;
-int speedY         = 0;
-int speedZ         = 0;
-int setpointX      = 90;
-int setpointY      = 90;
+int speedX             = 0;
+int speedY             = 0;
+int speedZ             = 0;
+int setpointX          = 90;
+int setpointY          = 90;
 
-int Zangle         = 0;
-bool newData       = false;
+int Zangle             = 0;
+bool newData           = false;
 
-int multiplier     = 15;
-int emergencyStop  = 11; // PIN
-int eStop          = 12; // PIN
-bool emgStop       = false;
+int multiplier         = 15;
+int emergencyStop      = 11; // PIN
+int eStop              = 12; // PIN
+bool emgStop           = false;
 
-bool runX          = false;
-bool runY          = false;
-bool runZ          = false;
-bool directX       = false; // false = Gauche / true = droite
-bool directY       = false; // false = Gauche / true = droite
-bool directZ       = false; // false = Gauche / true = droite
+int TMP_DATA[30]      ;
 
-bool xok           = false;
-bool yok           = false;
-bool zok           = false;
+bool runX              = false;
+bool runY              = false;
+bool runZ              = false;
+bool directX           = false; // false = Gauche / true = droite
+bool directY           = false; // false = Gauche / true = droite
+bool directZ           = false; // false = Gauche / true = droite
 
-long intX          = 0;
-long intY          = 0;
+bool xok               = false;
+bool yok               = false;
+bool zok               = false;
 
-bool production    = false;
-bool LED_PING      = false;
-bool BOOT          = false;
+long intX              = 0;
+long intY              = 0;
 
-bool enMotAB       = false;
-bool enMotXY       = false;
-bool enMotZ        = false;
+bool production        = false;
+bool LED_PING          = false;
+bool BOOT              = false;
+
+bool enMotAB           = false;
+bool enMotXY           = false;
+bool enMotZ            = false;
+
+
 
 unsigned long previousMillisX = 0;
 unsigned long previousMillisY = 0;
@@ -235,22 +268,27 @@ unsigned long trigS    = 0;
 void setup()
 {
 	// PINMODE
-	pinMode( PIN_ENABLE_AB , OUTPUT );
-	pinMode( PIN_ENABLE_XY , OUTPUT );
-	pinMode( PIN_ENABLE_Z  , OUTPUT );
+	pinMode( PIN_ENABLE_A  , OUTPUT );
+	pinMode( PIN_ENABLE_B  , OUTPUT );
 	pinMode( pinDirX       , OUTPUT );
 	pinMode( pinStepX      , OUTPUT );
 	pinMode( pinDirY       , OUTPUT );
 	pinMode( pinStepY      , OUTPUT );
-	pinMode( pinDirA       , OUTPUT );
+	pinMode( PIN_DIR_A     , OUTPUT );
 	pinMode( PIN_STEP_A    , OUTPUT );
-	pinMode( pinDirB       , OUTPUT );
-	pinMode( pinStepB      , OUTPUT );
-	pinMode( PING          , OUTPUT );
-	pinMode( LIGHT         , OUTPUT );
+	pinMode( PIN_DIR_B     , OUTPUT );
+	pinMode( PIN_STEP_B    , OUTPUT );
+	pinMode( LIGHTING      , OUTPUT );
+	pinMode( LED_1         , OUTPUT );
+	pinMode( LED_2         , OUTPUT );
+	pinMode( LED_3         , OUTPUT );
+	pinMode( LED_4         , OUTPUT );
+	pinMode( LED_5         , OUTPUT );
 	  
 	pinMode( Z_POSITION    , INPUT  );
-
+	pinMode( TRIGGER_LIGHT , INPUT  );
+	pinMode( SWITCH_1      , INPUT  );
+	
 	// SERIAL
 	Serial.begin(9600);
 
@@ -262,11 +300,19 @@ void setup()
 	Serial.println(" |  __  (|  __  (___) |   | | |   | | | |   | |   ");
 	Serial.println(" | |__)  ) |__)  )  | |___| | |   | |_| |_  | |   ");
 	Serial.println(" |______/|______/   |______/|_|   |_(_____) |_|   ");
+	Serial.println("==================================================");
+	Serial.println("                                                  ");
 	Serial.println("            _ Astromech Industrie _               ");
 	Serial.println("      > https://github.com/Gruniek/BB-UNIT <      ");
 	Serial.println("           > http://r2builders.fr/ <              ");
+	Serial.println("                                                  ");
+	Serial.println("           > Code by Daniel Mostosi <             ");
+	Serial.println("                                                  ");
+	Serial.println("                Report an issues?                 ");
+	Serial.println("    https://github.com/Gruniek/BB-UNIT/issues     ");
+	Serial.println("                                                  ");
 	Serial.print("           FIRMWARE VERSION : ");
-	Serial.print(version);
+	Serial.print(FIRMWARE_VERSION);
 	Serial.println("               ");
 	Serial.println("==================================================");
 
@@ -275,14 +321,21 @@ void setup()
 
 	// Start of the I2C protocol
 	Serial.print("[2]-Initializing I2C devices...  I2C ADRESS :");
-	Serial.println(adress);
-	Wire.begin(adress);
+	Serial.println(I2C_ADRESS);
+	Wire.begin(I2C_ADRESS);
 
 	// Start the MPU6050 Gyroscope
-	Serial.print("[3]-Connect to the MPU6050 : ");
-	accelgyro.initialize();
+	Serial.print("[3]-Connect to the MPU6050 HEAD: ");
+	//accelgyro.initialize();
+	accelgyroIC1.initialize();
+	Serial.println(accelgyroIC1.testConnection() ? "Connection successful" : "Connection failed");
+
+	Serial.print("[4]-Connect to the MPU6050 BODY: ");
+    accelgyroIC2.initialize();
+   	Serial.println(accelgyroIC2.testConnection() ? "Connection successful" : "Connection failed");
+
 	//Serial.println(accelgyro.testConnection());
-	Serial.println(accelgyro.testConnection() ? "Connection successful" : "Connection failed");
+	//Serial.println(accelgyro.testConnection() ? "Connection successful" : "Connection failed");
 
 	// Start the RF24 Radio controll
 	//Serial.println("[4]-Initializing RF24 devices...  ");
@@ -291,19 +344,19 @@ void setup()
 	//radio.startListening();
 
 	// Start remote connexion
-	Serial.println("[4]-Initializing HC-12 devices [REMOTE] ");
+	Serial.println("[5]-Initializing HC-12 devices [REMOTE] ");
 	controler.begin(9600);
 
 	// Start remote connexion
 	if(ifHead)
 	{
-		Serial.println("[5]-Initializing HC-12 devices [ HEAD ] ");
+		Serial.println("[6]-Initializing HC-12 devices [ HEAD ] ");
 		head.begin(9600);
 	}
 	// END OF BOOT/SETUP
-	Serial.println("====================");
-	Serial.println("Booting successful !");
-	Serial.println("====================");
+	Serial.println("=====================");
+	Serial.println("Booting successfull !");
+	Serial.println("=====================");
 }
 
 //=============================================================================//
@@ -317,9 +370,10 @@ void loop()
 	{
 		trigG = currentG;
 
-		// GET MOTION
+		// GET MOTION HEAD
 		//-------------------------------------------------------------------------//
-		accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+		//accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+		accelgyroIC1.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
 		if(INVERT_XY)
 		{
 			y = (((ax / 180) + ETALON_X) + 90);
@@ -329,6 +383,22 @@ void loop()
 		{
 			x = (((ax / 180) + ETALON_X) + 90);
 			y = (((ay / 180) + ETALON_Y) + 90);
+		}
+		
+		
+		// GET MOTION BODY
+		//-------------------------------------------------------------------------//
+		//accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+		accelgyroIC2.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+		if(INVERT_XY)
+		{
+			by = (((axb / 180) + ETALON_B_X) + 90);
+			bx = (((ayb / 180) + ETALON_B_Y) + 90);
+		}
+		else
+		{
+			bx = (((axb / 180) + ETALON_B_X) + 90);
+			by = (((ayb / 180) + ETALON_B_Y) + 90);
 		}
 	}
 
@@ -343,6 +413,13 @@ void loop()
 	}
 
 	if (controler.available()) // IF RF24 ---> radio.available()
+	{
+		char msg[64] = {0};
+		controler.readBytesUntil('\n', msg, sizeof msg); // IF RF24 ---> radio.read(&msg, sizeof(msg));
+		newData = true;
+	}
+
+	if (head.available()) 
 	{
 		char msg[64] = {0};
 		controler.readBytesUntil('\n', msg, sizeof msg); // IF RF24 ---> radio.read(&msg, sizeof(msg));
@@ -365,54 +442,136 @@ void loop()
 				switch (*p)
 				{
 					case 'x':
-						setpointX  = val;
+						TMP_DATA[1]  = val; // setpointX #1
 						break;
 					case 'y':
-						setpointY  = val;
+						TMP_DATA[2]  = val; // setpointY #2
 						break;
 					case 'm':
-						multiplier = val;
+						TMP_DATA[3] = val; // multiplier #3
 						break;
 					case 'i':
-						INVERT_XY   = val;
+						TMP_DATA[4]  = val; // INVERT_XY #4
 						break;
 					case 'j':
-						INVERT_X    = val;
+						TMP_DATA[5]   = val; // INVERT_X #5
 						break;
 					case 'k':
-						INVERT_Y    = val;
+						TMP_DATA[6]   = val; // INVERT_Y #6
 						break;
 					case 'h':
-						HYSTERESIS = val;
+						TMP_DATA[7] = val; // HYSTERESIS #7
+						break;
+					case 'c':
+						TMP_DATA[0] = val;  
 						break;
 				}
 			}
+			
+			if(TMP_DATA[0] == channel )
+			{
+				setpointX  = TMP_DATA[1];
+				setpointY  = TMP_DATA[2];
+				multiplier = TMP_DATA[3];
+				INVERT_XY  = TMP_DATA[4];
+				INVERT_X   = TMP_DATA[5];
+				INVERT_Y   = TMP_DATA[6];
+				HYSTERESIS = TMP_DATA[7];
+			}
+			
 		}
 
 		if (strcmp(strtok(msg, " "), "RUN") == 0)
 		{
-			Serial.println("ROll BB-8 ROLL !");
-			production = true;
+			char *p;
+			while ((p = strtok(NULL, " ")) != NULL)
+			{
+				int val = atoi(p + 1);
+				switch (*p)
+				{
+					case 'c':
+						TMP_DATA[0]  = val; 
+						break;
+				}
+			}
+			
+			if(TMP_DATA[0] == channel )
+			{
+				Serial.println("ROll BB-8 ROLL !");
+				production = true;
+				TMP_DATA[0] = 0;
+			}
 		}
 
 		if (strcmp(strtok(msg, " "), "STOP") == 0)
 		{
-			Serial.println("STOP");
-			production = false;
+			char *p;
+			while ((p = strtok(NULL, " ")) != NULL)
+			{
+				int val = atoi(p + 1);
+				switch (*p)
+				{
+					case 'c':
+						TMP_DATA[0]  = val; 
+						break;
+				}
+			}
+			
+			if(TMP_DATA[0] == channel )
+			{
+				Serial.println("STOP");
+				production = false;
+				TMP_DATA[0] = 0;
+			}
+
 		}
 
 		if (strcmp(strtok(msg, " "), "RESET") == 0)
 		{
-			Serial.println("RESET");
-			production = false;
-			emgStop    = false;
+			char *p;
+			while ((p = strtok(NULL, " ")) != NULL)
+			{
+				int val = atoi(p + 1);
+				switch (*p)
+				{
+					case 'c':
+						TMP_DATA[0]  = val; 
+						break;
+				}
+			}
+			
+			if(TMP_DATA[0] == channel )
+			{
+				Serial.println("RESET");
+				production = false;
+				emgStop    = false;
+				TMP_DATA[0] = 0;
+			}	
+
 		}
 
 		if (strcmp(strtok(msg, " "), "BOOT") == 0)
 		{
-			BOOT = true;
-			Serial.println("BOOTING UP...");
-			delay(2000);
+			char *p;
+			while ((p = strtok(NULL, " ")) != NULL)
+			{
+				int val = atoi(p + 1);
+				switch (*p)
+				{
+					case 'c':
+						TMP_DATA[0]  = val; 
+						break;
+				}
+			}
+			
+			if(TMP_DATA[0] == channel )
+			{
+				BOOT = true;
+				Serial.println("BOOTING UP...");
+				TMP_DATA[0] = 0;
+				delay(2000);
+			}	
+
 		}
 
 		if (strcmp(strtok(msg, " "), "ROTATE") == 0) // ROTATE d1 s100  <-- Rotate Z right, 18c/sec
@@ -425,12 +584,22 @@ void loop()
 				switch (*p)
 				{
 					case 'd':
-						directZ  = val;
+						TMP_DATA[8]  = val; // directZ #8
 						break;
 					case 's':
-						speedZ   = val;
+						TMP_DATA[9]   = val; // speedZ #9
+						break;
+					case 'c':
+						TMP_DATA[0]   = val; // channel #0
 						break;
 				}
+			}
+			
+			if(TMP_DATA[0] == channel )
+			{
+				directZ = TMP_DATA[8];
+				speedZ  = TMP_DATA[9];
+				TMP_DATA[0] = 0;
 			}
 		}
 
@@ -445,18 +614,30 @@ void loop()
 				switch (*p)
 				{
 					case 'a':
-						speedA  = val;
+						TMP_DATA[10] = val; // SPEED_A #10
 						break;
 					case 'b':
-						speedB  = val;
+						TMP_DATA[11] = val; // SPEED_B #11
 						break;
-					case 'c':
-						dirA    = val;
+					case 'e':
+						TMP_DATA[12] = val; // DIRECTION_A #12
 						break;
 					case 'd':
-						dirB    = val;
+						TMP_DATA[13] = val; // DIRECTION_B #13
+						break;
+					case 'c':
+						TMP_DATA[0]   = val; // channel #0
 						break;
 				}
+			}
+
+			if(TMP_DATA[0] == channel )
+			{
+				SPEED_A     = TMP_DATA[10];
+				SPEED_B     = TMP_DATA[11];
+				DIRECTION_A = TMP_DATA[12];
+				DIRECTION_B = TMP_DATA[13];
+				TMP_DATA[0] = 0;
 			}
 		}
 
@@ -471,23 +652,33 @@ void loop()
 				switch (*p)
 				{
 					case 'a':
-						enMotAB  = val;
+						TMP_DATA[14]  = val; // enMotAB #14
 						break;
 					case 'x':
-						enMotXY  = val;
+						TMP_DATA[15]  = val; // enMotXY #15
 						break;
 					case 'z':
-						enMotZ   = val;
+						TMP_DATA[16]   = val; // enMotZ #16
+						break;
+					case 'c':
+						TMP_DATA[0]   = val; // channel #0
 						break;
 				}
 			}
+		
+			if(TMP_DATA[0] == channel )
+			{
+				enMotAB     = TMP_DATA[14];
+				enMotXY     = TMP_DATA[15];
+				enMotZ      = TMP_DATA[16];
+				TMP_DATA[0] = 0;
+			}
 		}
-
 	}
 
-	digitalWrite( PIN_ENABLE_AB, enMotAB );
-	digitalWrite( PIN_ENABLE_XY, enMotXY );
-	digitalWrite( PIN_ENABLE_Z,  enMotZ  );
+	digitalWrite( PIN_ENABLE_A, enMotAB );
+	digitalWrite( PIN_ENABLE_B, enMotXY );
+
 
 	if(BOOT)
 	{
@@ -600,25 +791,25 @@ void loop()
 		// MOTOR A (Left)
 
 		// Run the motor
-		if(speedA > 0) runA = true;
-		else runA = false;
-		speedA = 1000 / speedA;
+		if(SPEED_A > 0) RUN_A = true;
+		else RUN_A = false;
+		SPEED_A = 1000 / SPEED_A;
 
 		// Motor direction / With inversion
 		if(INVERT_A)
 		{
-			if(dirA) dirA = false;
-			else dirA = true;
+			if(DIRECTION_A) DIRECTION_A = false;
+			else DIRECTION_A = true;
 		}
-		digitalWrite(pinDirA, dirA); // Set the direction
+		digitalWrite(PIN_DIR_A, DIRECTION_A); // Set the direction
 
 		// Send Step inpultion to the motor
 		unsigned long currentA = millis(); // millis();
-		if (currentA - previousMillisA >= speedA)
+		if (currentA - previousMillisA >= SPEED_A)
 		{
 			previousMillisA = currentA;
 
-			if(runA)
+			if(RUN_A)
 			{
 				digitalWrite(PIN_STEP_A, 1);
 				delayMicroseconds( 500 );
@@ -640,29 +831,29 @@ void loop()
 		// MOTOR B (Right)
 
 		// Run the motor
-		if(speedB > 0) runB = true;
-		else runB = false;
-		speedB = 1000 / speedB;
+		if(SPEED_B > 0) RUN_B = true;
+		else RUN_B = false;
+		SPEED_B = 1000 / SPEED_B;
 
 		// Motor direction / With inversion
 		if(INVERT_B)
 		{
-			if(dirB) dirB = false;
-			else dirB = true;
+			if(DIRECTION_B) DIRECTION_B = false;
+			else DIRECTION_B = true;
 		}
-		digitalWrite(pinDirB, dirB); // Set the direction
+		digitalWrite(PIN_DIR_B, DIRECTION_B); // Set the direction
 
 		// Send Step inpultion to the motor
 		unsigned long currentB = millis(); // millis();
-		if (currentB - previousMillisB >= speedB)
+		if (currentB - previousMillisB >= SPEED_B)
 		{
 			previousMillisB = currentB;
 
-			if(runB)
+			if(RUN_B)
 			{
-				digitalWrite(pinStepB, 1);
+				digitalWrite(PIN_STEP_B, 1);
 				delayMicroseconds( 500 );
-				digitalWrite(pinStepB, 0);
+				digitalWrite(PIN_STEP_B, 0);
 				delayMicroseconds( 500 );
 			}
 		}
@@ -824,12 +1015,15 @@ void loop()
 		digitalWrite(PING, LED_PING);
 
 		// IF THE MPU6050 ARE ALWAYS CONNECTED, IF NOT, HE RECONNECT AUTOMATICLY
-		if(!accelgyro.testConnection());
+		//if(!accelgyro.testConnection());
+		if(!accelgyroIC1.testConnection());
 		{
 			production = false;
 			emgStop = true;
-			accelgyro.initialize();
-			if(accelgyro.testConnection())
+			//accelgyro.initialize();
+			accelgyroIC1.initialize();
+			//if(accelgyro.testConnection())
+			if(accelgyroIC1.testConnection())
 			{
 				production = true;
 			}
