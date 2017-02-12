@@ -160,16 +160,15 @@ int     HYSTERESIS     = 1;     // HYSTERESSIS FOR THE ANGLE CALCULATION
 #define PIN_STEP_B       25      // PIN STEP FOR X
 #define PIN_DIR_B        23      // PIN DIRECTION FOR X 
 
-#define pinStepX         26      // PIN STEP FOR X
-#define pinDirX          24      // PIN DIRECTION FOR X 
+#define PIN_STEP_X       26      // PIN STEP FOR X
+#define PIN_DIRECTION_X  24      // PIN DIRECTION FOR X 
 
-#define pinStepY         4       // PIN STEP FOR Y
-#define pinDirY          3       // PIN DIRECTION FOR Y
+#define PIN_STEP_Y       4       // PIN STEP FOR Y
+#define PIN_DIRECTION_Y  3       // PIN DIRECTION FOR Y
 
-#define pinStepZ         8       // PIN STEP FOR Y
-#define pinDirZ          9       // PIN DIRECTION FOR Y
+#define PIN_STEP_Z       8       // PIN STEP FOR Y
+#define PIN_DIRECTION_Z  9       // PIN DIRECTION FOR Y
 #define Z_POSITION       35      // PIN FOR THE DIGITAL INPUT FOR THE HEAD POSITION
-
 
 #define TRIGGER_LIGHT    36      // PIN TRIGGER FOR START/STOP THE LIGHTING INSIDE THE BALL
 #define LIGHTING         37      // PIN FOR FEED THE LIGHTING
@@ -182,7 +181,6 @@ int     HYSTERESIS     = 1;     // HYSTERESSIS FOR THE ANGLE CALCULATION
 #define LED_4            46      // LED 4
 #define LED_5            42      // LED 5
 
-
 #define PING             13
 
 #define LIGHT            20      // Pin for turn on/off lighting on the ball (Great for a technical maintenance ;) )
@@ -191,62 +189,57 @@ int     HYSTERESIS     = 1;     // HYSTERESSIS FOR THE ANGLE CALCULATION
 #define VOLTAGE          6
 
 // I2C
-int I2C_ADRESS         = 1;
+int  I2C_ADRESS         = 1;
 
 // MOTOR VARIABLE
-int SPEED_A            = 0;
-int SPEED_B            = 0;
-bool RUN_A             = false;
-bool RUN_B             = false;
-bool DIRECTION_A       = true;   // true = Front | false = back
-bool DIRECTION_B       = true;   // true = Front | false = back
+int  SPEED_A            = 0;
+int  SPEED_B            = 0;
+bool RUN_A              = false;
+bool RUN_B              = false;
+bool DIRECTION_A        = true;   // true = Front | false = back
+bool DIRECTION_B        = true;   // true = Front | false = back
 
-int x                  = 0;
-int y                  = 0;
-int bx                 = 0;
-int by                 = 0;
-int vx                 = 0;
-int vy                 = 0;
+int  x                  = 0;
+int  y                  = 0;
+int  bx                 = 0;
+int  by                 = 0;
+int  vx                 = 0;
+int  vy                 = 0;
 
-int speedX             = 0;
-int speedY             = 0;
-int speedZ             = 0;
-int setpointX          = 90;
-int setpointY          = 90;
+int  SPEED_X            = 0;
+int  SPEED_Y            = 0;
+int  SPEED_Z            = 0;
+int  SETPOINT_X         = 90;
+int  SETPOINT_Y         = 90;
 
-int Zangle             = 0;
-bool newData           = false;
+int  Z_ANGLE            = 0;
+bool NEW_DATA           = false;
 
-int multiplier         = 15;
-int emergencyStop      = 11; // PIN
-int eStop              = 12; // PIN
-bool emgStop           = false;
+int  MULTIPLIER         = 15;
+int  EMERGENCY_STOP     = 11; // PIN
+int  E_STOP             = 12; // PIN
+bool EMG_STOP           = false;
 
-int TMP_DATA[30]      ;
+int  TMP_DATA[30];
 
-bool runX              = false;
-bool runY              = false;
-bool runZ              = false;
-bool directX           = false; // false = Gauche / true = droite
-bool directY           = false; // false = Gauche / true = droite
-bool directZ           = false; // false = Gauche / true = droite
+bool RUN_X              = false;
+bool RUN_Y              = false;
+bool RUN_               = false;
+bool DIRECT_X           = false; // false = Gauche / true = droite
+bool DIRECT_Y           = false; // false = Gauche / true = droite
+bool DIRECT_Z           = false; // false = Gauche / true = droite
+ 
+bool X_OK               = false;
+bool Y_OK               = false;
+bool Z_OK               = false;
 
-bool xok               = false;
-bool yok               = false;
-bool zok               = false;
+bool PRODUCTION         = false;
+bool LED_PING           = false;
+bool BOOT               = false;
 
-long intX              = 0;
-long intY              = 0;
-
-bool production        = false;
-bool LED_PING          = false;
-bool BOOT              = false;
-
-bool enMotAB           = false;
-bool enMotXY           = false;
-bool enMotZ            = false;
-
-
+bool ENABLE_MOTOR_AB    = false;
+bool ENABLE_MOTOR_XY    = false;
+bool ENABLE_MOTOR_Z     = false;
 
 unsigned long previousMillisX = 0;
 unsigned long previousMillisY = 0;
@@ -268,26 +261,26 @@ unsigned long trigS    = 0;
 void setup()
 {
 	// PINMODE
-	pinMode( PIN_ENABLE_A  , OUTPUT );
-	pinMode( PIN_ENABLE_B  , OUTPUT );
-	pinMode( pinDirX       , OUTPUT );
-	pinMode( pinStepX      , OUTPUT );
-	pinMode( pinDirY       , OUTPUT );
-	pinMode( pinStepY      , OUTPUT );
-	pinMode( PIN_DIR_A     , OUTPUT );
-	pinMode( PIN_STEP_A    , OUTPUT );
-	pinMode( PIN_DIR_B     , OUTPUT );
-	pinMode( PIN_STEP_B    , OUTPUT );
-	pinMode( LIGHTING      , OUTPUT );
-	pinMode( LED_1         , OUTPUT );
-	pinMode( LED_2         , OUTPUT );
-	pinMode( LED_3         , OUTPUT );
-	pinMode( LED_4         , OUTPUT );
-	pinMode( LED_5         , OUTPUT );
+	pinMode( PIN_ENABLE_A    , OUTPUT );
+	pinMode( PIN_ENABLE_B    , OUTPUT );
+	pinMode( PIN_DIRECTION_X , OUTPUT );
+	pinMode( PIN_STEP_X      , OUTPUT );
+	pinMode( PIN_DIRECTION_Y , OUTPUT );
+	pinMode( PIN_STEP_Y      , OUTPUT );
+	pinMode( PIN_DIR_A       , OUTPUT );
+	pinMode( PIN_STEP_A      , OUTPUT );
+	pinMode( PIN_DIR_B       , OUTPUT );
+	pinMode( PIN_STEP_B      , OUTPUT );
+	pinMode( LIGHTING        , OUTPUT );
+	pinMode( LED_1           , OUTPUT );
+	pinMode( LED_2           , OUTPUT );
+	pinMode( LED_3           , OUTPUT );
+	pinMode( LED_4           , OUTPUT );
+	pinMode( LED_5           , OUTPUT );
 	  
-	pinMode( Z_POSITION    , INPUT  );
-	pinMode( TRIGGER_LIGHT , INPUT  );
-	pinMode( SWITCH_1      , INPUT  );
+	pinMode( Z_POSITION      , INPUT  );
+	pinMode( TRIGGER_LIGHT   , INPUT  );
+	pinMode( SWITCH_1        , INPUT  );
 	
 	// SERIAL
 	Serial.begin(9600);
@@ -409,27 +402,27 @@ void loop()
 	if (Serial.available() > 0)
 	{
 		Serial.readBytesUntil('\n', msg, sizeof msg);
-		newData = true;
+		NEW_DATA = true;
 	}
 
 	if (controler.available()) // IF RF24 ---> radio.available()
 	{
 		char msg[64] = {0};
 		controler.readBytesUntil('\n', msg, sizeof msg); // IF RF24 ---> radio.read(&msg, sizeof(msg));
-		newData = true;
+		NEW_DATA = true;
 	}
 
 	if (head.available()) 
 	{
 		char msg[64] = {0};
 		controler.readBytesUntil('\n', msg, sizeof msg); // IF RF24 ---> radio.read(&msg, sizeof(msg));
-		newData = true;
+		NEW_DATA = true;
 	}
 
-	if(newData)
+	if(NEW_DATA)
 	{
 		Serial.println(msg);
-		newData = false;
+		NEW_DATA = false;
 
 		if (strcmp(strtok(msg, " "), "SET") == 0)
 		{
@@ -442,13 +435,13 @@ void loop()
 				switch (*p)
 				{
 					case 'x':
-						TMP_DATA[1]  = val; // setpointX #1
+						TMP_DATA[1]  = val; // SETPOINT_X #1
 						break;
 					case 'y':
-						TMP_DATA[2]  = val; // setpointY #2
+						TMP_DATA[2]  = val; // SETPOINT_Y #2
 						break;
 					case 'm':
-						TMP_DATA[3] = val; // multiplier #3
+						TMP_DATA[3] = val; // MULTIPLIER #3
 						break;
 					case 'i':
 						TMP_DATA[4]  = val; // INVERT_XY #4
@@ -470,9 +463,9 @@ void loop()
 			
 			if(TMP_DATA[0] == channel )
 			{
-				setpointX  = TMP_DATA[1];
-				setpointY  = TMP_DATA[2];
-				multiplier = TMP_DATA[3];
+				SETPOINT_X = TMP_DATA[1];
+				SETPOINT_Y = TMP_DATA[2];
+				MULTIPLIER = TMP_DATA[3];
 				INVERT_XY  = TMP_DATA[4];
 				INVERT_X   = TMP_DATA[5];
 				INVERT_Y   = TMP_DATA[6];
@@ -498,7 +491,7 @@ void loop()
 			if(TMP_DATA[0] == channel )
 			{
 				Serial.println("ROll BB-8 ROLL !");
-				production = true;
+				PRODUCTION  = true;
 				TMP_DATA[0] = 0;
 			}
 		}
@@ -520,7 +513,7 @@ void loop()
 			if(TMP_DATA[0] == channel )
 			{
 				Serial.println("STOP");
-				production = false;
+				PRODUCTION  = false;
 				TMP_DATA[0] = 0;
 			}
 
@@ -543,8 +536,8 @@ void loop()
 			if(TMP_DATA[0] == channel )
 			{
 				Serial.println("RESET");
-				production = false;
-				emgStop    = false;
+				PRODUCTION  = false;
+				EMG_STOP    = false;
 				TMP_DATA[0] = 0;
 			}	
 
@@ -584,10 +577,10 @@ void loop()
 				switch (*p)
 				{
 					case 'd':
-						TMP_DATA[8]  = val; // directZ #8
+						TMP_DATA[8]  = val; // DIRECT_Z #8
 						break;
 					case 's':
-						TMP_DATA[9]   = val; // speedZ #9
+						TMP_DATA[9]   = val; // SPEED_Z #9
 						break;
 					case 'c':
 						TMP_DATA[0]   = val; // channel #0
@@ -597,8 +590,8 @@ void loop()
 			
 			if(TMP_DATA[0] == channel )
 			{
-				directZ = TMP_DATA[8];
-				speedZ  = TMP_DATA[9];
+				DIRECT_Z = TMP_DATA[8];
+				SPEED_Z  = TMP_DATA[9];
 				TMP_DATA[0] = 0;
 			}
 		}
@@ -652,13 +645,13 @@ void loop()
 				switch (*p)
 				{
 					case 'a':
-						TMP_DATA[14]  = val; // enMotAB #14
+						TMP_DATA[14]  = val; // ENABLE_MOTOR_AB #14
 						break;
 					case 'x':
-						TMP_DATA[15]  = val; // enMotXY #15
+						TMP_DATA[15]  = val; // ENABLE_MOTOR_XY #15
 						break;
 					case 'z':
-						TMP_DATA[16]   = val; // enMotZ #16
+						TMP_DATA[16]   = val; // ENABLE_MOTOR_Z #16
 						break;
 					case 'c':
 						TMP_DATA[0]   = val; // channel #0
@@ -668,76 +661,76 @@ void loop()
 		
 			if(TMP_DATA[0] == channel )
 			{
-				enMotAB     = TMP_DATA[14];
-				enMotXY     = TMP_DATA[15];
-				enMotZ      = TMP_DATA[16];
-				TMP_DATA[0] = 0;
+				ENABLE_MOTOR_AB = TMP_DATA[14];
+				ENABLE_MOTOR_XY = TMP_DATA[15];
+				ENABLE_MOTOR_Z  = TMP_DATA[16];
+				TMP_DATA[0]     = 0;
 			}
 		}
 	}
 
-	digitalWrite( PIN_ENABLE_A, enMotAB );
-	digitalWrite( PIN_ENABLE_B, enMotXY );
+	digitalWrite( PIN_ENABLE_A, ENABLE_MOTOR_AB );
+	digitalWrite( PIN_ENABLE_B, ENABLE_MOTOR_XY );
 
 
 	if(BOOT)
 	{
-		enMotAB = true;
-		enMotXY = true;
-		enMotZ  = true;
+		ENABLE_MOTOR_AB = true;
+		ENABLE_MOTOR_XY = true;
+		ENABLE_MOTOR_Z  = true;
 
 		// SET X IN POSITION
-		if(x < 90) directX = false;
-		else directX = true;
+		if(x < 90) DIRECT_X = false;
+		else DIRECT_X = true;
 
 		if(INVERT_X)
 		{
-			if(directX) directX = false;
-			else directX = true;
+			if(DIRECT_X) DIRECT_X = false;
+			else DIRECT_X = true;
 		}
-		digitalWrite(pinDirX, directX); // dirX
+		digitalWrite(PIN_DIRECTION_X, DIRECT_X); // dirX
 
-		if(x > (setpointX + HYSTERESIS || (x < setpointX - HYSTERESIS || !xok )))
+		if(x > (SETPOINT_X + HYSTERESIS || (x < SETPOINT_X - HYSTERESIS || !X_OK )))
 		{
-			digitalWrite(pinStepX, 1);
+			digitalWrite(PIN_STEP_X, 1);
 			delayMicroseconds( 500 );
-			digitalWrite(pinStepX, 0);
+			digitalWrite(PIN_STEP_X, 0);
 			delayMicroseconds( 500 );
 		}
 		else
 		{
-			if(!xok)
+			if(!X_OK)
 			{
 				Serial.println("BOOT x1 ");
-				xok = true;
+				X_OK = true;
 				delay(2000);
 			}
 		}
 
 		// SET Y IN POSITION
-		if(y < 90) directY = false;
-		else directY = true;
+		if(y < 90) DIRECT_Y = false;
+		else DIRECT_Y = true;
 
 		if(INVERT_Y)
 		{
-			if(directY) directY = false;
-			else directY = true;
+			if(DIRECT_Y) DIRECT_Y = false;
+			else DIRECT_Y = true;
 		}
-		digitalWrite(pinDirY, directY); // dirX
+		digitalWrite(PIN_DIRECTION_Y, DIRECT_Y); // dirX
 
-		if(y > (setpointY + HYSTERESIS) || (y < setpointY - HYSTERESIS || !yok))
+		if(y > (SETPOINT_Y + HYSTERESIS) || (y < SETPOINT_Y - HYSTERESIS || !Y_OK))
 		{
-			digitalWrite(pinStepY, 1);
+			digitalWrite(PIN_STEP_Y, 1);
 			delayMicroseconds( 500 );
-			digitalWrite(pinStepY, 0);
+			digitalWrite(PIN_STEP_Y, 0);
 			delayMicroseconds( 500 );
 		}
 		else
 		{
-			if(!yok)
+			if(!Y_OK)
 			{
 				Serial.println("BOOT y1 ");
-				yok = true;
+				Y_OK = true;
 				delay(2000);
 			}
 		}
@@ -745,38 +738,38 @@ void loop()
 		// SET Z IN POSITION
 		if(!digitalRead(Z_POSITION))
 		{
-			digitalWrite(pinStepZ, 1);
+			digitalWrite(PIN_STEP_Z, 1);
 			delayMicroseconds( 500 );
-			digitalWrite(pinStepZ, 0);
+			digitalWrite(PIN_STEP_Z, 0);
 			delayMicroseconds( 500 );
 		}
 		else
 		{
-			if(!zok)
+			if(!Z_OK)
 			{
 				Serial.println("BOOT z1 ");
-				zok = true;
-				Zangle = 0;
+				Z_OK = true;
+				Z_ANGLE = 0;
 				delay(2000);
 			}
 		}
 
-		if( xok && yok && zok)
+		if( X_OK && Y_OK && Z_OK)
 		{
 			Serial.println("STAT b1 ");
 			Serial.println("Booting UP OK!");
-			Serial.println("SEND 'RUN \n' for start the production");
+			Serial.println("SEND 'RUN \n' for start the PRODUCTION");
 			BOOT = false;
 		}
 	}
 
 	// PRODUCTION CODE
 	//-------------------------------------------------------------------------//
-	if(production && !emgStop)  //-
+	if(PRODUCTION && !EMG_STOP)  //-
 	{
-		enMotAB = true;
-		enMotXY = true;
-		enMotZ  = true;
+		ENABLE_MOTOR_AB = true;
+		ENABLE_MOTOR_XY = true;
+		ENABLE_MOTOR_Z  = true;
 
 		//======================================================================
 		//        d8888
@@ -870,45 +863,45 @@ void loop()
 		//======================================================================
 
 		// Direction
-		if(x < 90) directX = false;
-		else directX = true;
+		if(x < 90) DIRECT_X = false;
+		else DIRECT_X = true;
 
 		if(INVERT_X)
 		{
-			if(directX) directX = false;
-			else directX = true;
+			if(DIRECT_X) DIRECT_X = false;
+			else DIRECT_X = true;
 		}
-		digitalWrite(pinDirX, directX); // dirX
+		digitalWrite(PIN_DIRECTION_X, DIRECT_X); // dirX
 
 		// Si ont doit demarer le moteur
-		if(x > (setpointX + HYSTERESIS) || (x < setpointX - HYSTERESIS ))
+		if(x > (SETPOINT_X + HYSTERESIS) || (x < SETPOINT_X - HYSTERESIS ))
 		{
-			if(x > MIN_X && x < MAX_X) runX = true;
-			else runX = false;
+			if(x > MIN_X && x < MAX_X) RUN_X = true;
+			else RUN_X = false;
 		}
-		else runX = false;
+		else RUN_X = false;
 
 		// Calcul du PID X
-		if(x < setpointX) vx = (setpointX - x);
+		if(x < SETPOINT_X) vx = (SETPOINT_X - x);
 		if(x == 0) vx = 0;
-		if(x > setpointX) vx = (x - setpointX);
+		if(x > SETPOINT_X) vx = (x - SETPOINT_X);
 
-		speedX = 1000 / (vx);
-		speedX = speedX * multiplier; // DEL
-		if(speedX < 15) speedX = 15;
+		SPEED_X = 1000 / (vx);
+		SPEED_X = SPEED_X * MULTIPLIER; // DEL
+		if(SPEED_X < 15) SPEED_X = 15;
 
 		// Mise en route du moteur
 		unsigned long currentX = millis();
 
-		if (currentX - previousMillisX >= speedX)
+		if (currentX - previousMillisX >= SPEED_X)
 		{
 			previousMillisX = currentX;
 
-			if(runX)
+			if(RUN_X)
 			{
-				digitalWrite(pinStepX, 1);
+				digitalWrite(PIN_STEP_X, 1);
 				delayMicroseconds( 500 );
-				digitalWrite(pinStepX, 0);
+				digitalWrite(PIN_STEP_X, 0);
 				delayMicroseconds( 500 );
 			}
 		}
@@ -925,44 +918,44 @@ void loop()
 		//======================================================================
 
 		// Direction
-		if(y < 90) directY = false;
-		else directY = true;
+		if(y < 90) DIRECT_Y = false;
+		else DIRECT_Y = true;
 		if(INVERT_Y)
 		{
-			if(directY) directY = false;
-			else directY = true;
+			if(DIRECT_Y) DIRECT_Y = false;
+			else DIRECT_Y = true;
 		}
-		digitalWrite(pinDirY, directY);
+		digitalWrite(PIN_DIRECTION_Y, DIRECT_Y);
 
 		// Si ont doit demarer le moteur
-		if(y > (setpointY + HYSTERESIS) || (y < setpointY - HYSTERESIS ))
+		if(y > (SETPOINT_Y + HYSTERESIS) || (y < SETPOINT_Y - HYSTERESIS ))
 		{
-			if(y > MIN_Y && y < MAX_Y) runY = true;
-			else runY = false;
+			if(y > MIN_Y && y < MAX_Y) RUN_Y = true;
+			else RUN_Y = false;
 		}
-		else runY = false;
+		else RUN_Y = false;
 
 		// Calcul du PID Y
-		if(y < setpointY) vy = (setpointY - y);
+		if(y < SETPOINT_Y) vy = (SETPOINT_Y - y);
 		if(y == 0) vy = 0;
-		if(y > setpointY) vy = (y - setpointY);
+		if(y > SETPOINT_Y) vy = (y - SETPOINT_Y);
 
-		speedY = 1000 / (vy);
-		speedY = speedY * multiplier; // DEL
-		if(speedY < 15) speedY = 15;
+		SPEED_Y = 1000 / (vy);
+		SPEED_Y = SPEED_Y * MULTIPLIER; // DEL
+		if(SPEED_Y < 15) SPEED_Y = 15;
 
 		// Mise en route du moteur
 		unsigned long currentY = millis(); // millis();
 
-		if (currentY - previousMillisY >= speedY)
+		if (currentY - previousMillisY >= SPEED_Y)
 		{
 			previousMillisY = currentY;
 
-			if(runY)
+			if(RUN_Y)
 			{
-				digitalWrite(pinStepY, 1);
+				digitalWrite(PIN_STEP_Y, 1);
 				delayMicroseconds( 500 );
-				digitalWrite(pinStepY, 0);
+				digitalWrite(PIN_STEP_Y, 0);
 				delayMicroseconds( 500 );
 			}
 		}
@@ -978,26 +971,26 @@ void loop()
 		// d8888888888
 		//======================================================================
 
-		digitalWrite(pinDirZ, directZ);
-		if(speedZ != 0)
+		digitalWrite(PIN_DIRECTION_Z, DIRECT_Z);
+		if(SPEED_Z != 0)
 		{
 			unsigned long currentZ = millis();
 
-			if (currentZ - previousMillisZ >= speedZ)
+			if (currentZ - previousMillisZ >= SPEED_Z)
 			{
 				previousMillisZ = currentZ;
 
-				digitalWrite(pinStepY, 1);
+				digitalWrite(PIN_STEP_Y, 1);
 				delayMicroseconds( 500 );
-				digitalWrite(pinStepY, 0);
+				digitalWrite(PIN_STEP_Y, 0);
 				delayMicroseconds( 500 );
-				if(directZ) Zangle++;
-				else Zangle--;
+				if(DIRECT_Z) Z_ANGLE++;
+				else Z_ANGLE--;
 			}
 		}
 
-		if(Zangle == 201) Zangle = 0;
-		if(Zangle == -1)  Zangle = 0;
+		if(Z_ANGLE == 201) Z_ANGLE = 0;
+		if(Z_ANGLE == -1)  Z_ANGLE = 0;
 
 	}
 
@@ -1018,15 +1011,12 @@ void loop()
 		//if(!accelgyro.testConnection());
 		if(!accelgyroIC1.testConnection());
 		{
-			production = false;
-			emgStop = true;
+			PRODUCTION = false;
+			EMG_STOP = true;
 			//accelgyro.initialize();
 			accelgyroIC1.initialize();
 			//if(accelgyro.testConnection())
-			if(accelgyroIC1.testConnection())
-			{
-				production = true;
-			}
+			if(accelgyroIC1.testConnection()) PRODUCTION = true;
 		}
 
 		
@@ -1044,9 +1034,9 @@ void loop()
 		Serial.print(" k");
 		Serial.print(INVERT_XY);
 		Serial.print(" m");
-		Serial.print(multiplier);
+		Serial.print(MULTIPLIER);
 		Serial.print(" z");
-		Serial.print(Zangle);
+		Serial.print(Z_ANGLE);
 
 		Serial.println(" ");
 
@@ -1064,9 +1054,9 @@ void loop()
 		controler.print(" k");
 		controler.print(INVERT_Y);
 		controler.print(" m");
-		controler.print(multiplier);
+		controler.print(MULTIPLIER);
 		controler.print(" z");
-		controler.print(Zangle);
+		controler.print(Z_ANGLE);
 		
 		
 	} // ENF OF PRODUCTION
