@@ -1,0 +1,98 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=BB-UNIT2
+*Date=21:41:54
+*CreatedBy=Fritzing 0.9.3b.04.19.5c895d327c44a3114e5fcc9d8260daf0cbb52806
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;220;THT;22.9495;-50.6821;0;Bottom;R11
+2;;3 mm [THT];36.3405;-55.7619;90;Bottom;LED7
+3;;THT;91.5295;-29.0921;0;Bottom;J3
+4;;3 mm [THT];36.3405;-50.6819;90;Bottom;LED2
+5;;THT;16.5995;-10.0421;90;Bottom;J29
+6;;THT;3.13746;-19.3691;0;Bottom;J5
+7;;SO16;80.0995;-29.0921;0;Bottom;Pololu A3
+8;;;108.492;-50.3243;0;Bottom;TXT1
+9;;;5.16954;-65.9221;0;Bottom;Hole3
+10;;THT;97.8795;-24.0121;0;Bottom;J12
+11;;THT;16.5995;-2.42209;90;Bottom;J32
+12;;;7.70946;-25.2821;0;Bottom;Jumper8
+13;;THT;41.9995;-60.8421;90;Bottom;J28
+14;;;58.5095;-22.7421;0;Bottom;Jumper10
+15;1µF;100 mil [THT, electrolytic];96.6095;-36.7121;-90;Bottom;C3
+16;;THT;77.5595;-30.3621;0;Bottom;J13
+17;;;5.16954;-4.96201;0;Bottom;Hole2
+18;;;76.55;-24.0228;0;Bottom;TXT2
+19;;THT;16.5995;-4.96209;90;Bottom;J31
+20;220;THT;22.9495;-43.0621;0;Bottom;R8
+21;;THT;5.16946;-54.4921;0;Bottom;J34
+22;;;53.7117;-24.0228;0;Bottom;TXT2
+23;;;83.9095;-36.7121;0;Bottom;Jumper3
+24;;;38.1895;-35.4421;0;Bottom;Jumper1
+25;;THT;104.737;-36.3591;0;Bottom;J21
+26;;;108.593;-34.183;90;Bottom;TXT1
+27;;;106.77;-4.96201;0;Bottom;Hole1
+28;;;15.3295;-21.4721;0;Bottom;Jumper5
+29;;;91.4312;-56.2832;90;Bottom;TXT6
+30;;;31.2208;-24.4572;180;Bottom;TXT2
+31;;;99.1495;-43.0621;0;Bottom;Jumper9
+32;220;THT;22.9495;-53.2221;0;Bottom;R12
+33;;;55.6636;-54.2841;90;Bottom;IMG2
+34;;;43.2695;-41.7921;0;Bottom;Jumper7
+35;220;THT;88.9895;-45.6021;180;Bottom;R16
+36;;THT;31.8395;-30.3621;0;Bottom;J15
+37;;;76.2895;-45.6021;0;Bottom;Jumper6
+38;;THT;3.89946;-44.3321;0;Bottom;J26
+39;;THT;90.2595;-10.0421;90;Bottom;J25
+40;;3 mm [THT];31.2605;-43.0619;90;Bottom;LED5
+41;;;61.0495;-36.7121;0;Bottom;Jumper2
+42;;[THT];75.5793;-58.0123;0;Bottom;S2
+43;;;55.9267;-39.2521;180;Bottom;Composant1
+44;;THT;80.0995;-10.0421;90;Bottom;J9
+45;;3 mm [THT];31.2605;-48.1419;90;Bottom;LED3
+46;220;THT;22.9495;-55.7621;0;Bottom;R14
+47;220;THT;22.9495;-48.1421;0;Bottom;R10
+48;;3 mm [THT];96.6093;-47.4511;180;Bottom;LED6
+49;;;104.668;-19.1552;90;Bottom;TXT5
+50;;;7.70946;-44.3321;0;Bottom;Jumper11
+51;220;THT;22.9495;-58.3021;0;Bottom;R15
+52;;THT;104.76;-49.017;0;Bottom;J27
+53;;;2.41046;-12.1723;90;Bottom;TXT2
+54;;THT;54.6995;-30.3621;0;Bottom;J14
+55;;;68.6695;-53.2221;0;Bottom;Jumper4
+56;;THT;68.6695;-29.0921;0;Bottom;J1
+57;10k;THT;25.4895;-22.7421;90;Bottom;R7
+58;1µF;100 mil [THT, electrolytic];71.2095;-41.7921;-90;Bottom;C2
+59;;THT;16.5995;-7.50209;90;Bottom;J30
+60;;3 mm [THT];36.3405;-45.6019;90;Bottom;LED4
+61;1µF;100 mil [THT, electrolytic];48.3495;-41.7921;-90;Bottom;C1
+62;;THT;34.6464;-6.99417;90;Bottom;J7
+63;;SO16;57.2395;-29.0921;0;Bottom;Pololu A2
+64;;;87.5199;-56.5761;90;Bottom;TXT6
+65;;THT;45.8095;-29.0921;0;Bottom;J2
+66;;SO16;34.3795;-29.0921;0;Bottom;Pololu A1
+67;;;42.4712;-66.5151;0;Bottom;TXT4
+68;;3 mm [THT];31.2605;-53.2219;90;Bottom;LED1
+69;;THT;19.1395;-60.8421;90;Bottom;J33
+70;;THT;3.13746;-32.0691;0;Bottom;J6
+71;220;THT;22.9495;-45.6021;0;Bottom;R9
+72;;3 mm [THT];31.2605;-58.3019;90;Bottom;LED8
+73;;;2.4209;-38.4639;90;Bottom;TXT2
+74;;THT;54.6995;-7.50209;90;Bottom;J24
+75;;;108.506;-46.9654;90;Bottom;TXT1
+76;;[THT];19.6993;-37.6923;0;Bottom;S3
+77;10k;THT;17.8695;-20.2021;90;Bottom;R3
+78;;;93.2226;-56.4792;90;Bottom;IMG1
+79;;;108.864;-38.0038;0;Bottom;TXT1
+80;;;98.2938;-14.6048;0;Bottom;TXT1
+81;;THT;80.0995;-4.96209;90;Bottom;J20
+82;;;106.77;-65.9221;0;Bottom;Hole4
+83;;[THT];19.6993;-30.0723;0;Bottom;S1
