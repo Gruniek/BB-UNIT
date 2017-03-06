@@ -1,4 +1,4 @@
- - OPEN BB-X -
+ - BB-UNIT -
  A open source BB-8 for create you own BB-8!
  ###########################################
  https://github.com/Gruniek/BB-UNIT
